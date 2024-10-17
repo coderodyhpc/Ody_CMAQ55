@@ -8,35 +8,40 @@
  export compiler=gcc
  export Vrsn=14.2
  export compilerVrsn=14
+ echo "Compiler is set to $compiler"
+
 
 # =======================================================================
 #> Begin User Input Section
 # =======================================================================
 
 #> Source Code Locations
- BCON_SRC=${CMAQ_REPO}/PREP/bcon/src #> location of the BCON source code
- export REPOROOT=$BCON_SRC
+ ICON_SRC=${CMAQ_REPO}/PREP/icon/src #> location of the ICON source code
+ export REPOROOT=$ICON_SRC
 
 #> Working directory and Version IDs
- VRSN=v55                     #> Code Version
- EXEC=BCON_${VRSN}.exe        #> executable name for this application
- CFG=BCON_${VRSN}.cfg         #> BLDMAKE configuration file name
+ VRSN=v54                     #> Code Version
+ EXEC=ICON_${VRSN}.exe        #> executable name for this application
+ CFG=ICON_${VRSN}.cfg         #> BLDMAKE configuration file name
 
 #> Controls for managing the source code and MPI compilation
-# CopySrcTree                 #> copy the source files and directory tree into the build directory
-# Opt=verbose                 #> show requested commands as they are executed
-# MakeFileOnly                #> uncomment to build a Makefile, but do not compile; 
-                              #>   comment out to compile the model (default if not set)
-# Debug_BCON                  #> uncomment to compile BCON with debug option equal to TRUE
-                              #>   comment out to use standard, optimized compile process
+# CompileBLDMAKE                 #> Recompile the BLDMAKE utility from source
+#                                #>   comment out to use an existing BLDMAKE executable
+# CopySrc                        #> copy the source files into the BLD directory
+#set CopySrcTree                 #> copy the source files and directory tree into the build directory
+#set Opt = verbose               #> show requested commands as they are executed
+#set MakeFileOnly                #> uncomment to build a Makefile, but do not compile; 
+                                 #>   comment out to compile the model (default if not set)
+#set Debug_ICON                  #> uncomment to compile ICON with debug option equal to TRUE
+                                 #>   comment out to use standard, optimized compile process
 
  export compilerString=${compiler}
  export compilerString=${compiler}${compilerVrsn}
 
 #>==============================================================================
-#> BCON Science Modules
+#> ICON Science Modules
 #>
-#> NOTE:  BC type is now a runtime option.  All BC types are included at
+#> NOTE:  IC type is now a runtime option.  All IC types are included at
 #>        compile time
 #>==============================================================================
 
@@ -66,6 +71,7 @@
  CPP_FLAGS=""
  LINK_FLAGS=""
 
+ 
  LIB1="$ioapi_lib"
  LIB2="$netcdf_lib $extra_lib"
  LIB3="$netcdff_lib"
@@ -74,11 +80,23 @@
 #> Implement User Input
 #============================================================================================
 
+#> Check for CMAQ_REPO and CMAQ_LIB settings:
+ if [ ! -e $CMAQ_REPO ] || [ ! -e $CMAQ_LIB ]
+ then
+    echo "   $CMAQ_REPO or $CMAQ_LIB directory not found"
+###    exit 1
+ fi
+ echo "    Model repository base path: $CMAQ_REPO"
+ echo "                  library path: $CMAQ_LIB"
 
-#> Set and create the "BLD" directory for checking out and compiling 
-#> source code. Move current directory to that build directory.
- Bld=$CMAQ_HOME/PREP/bcon/scripts/BLD_BCON_${VRSN}_${compilerString}
+#> If $CMAQ_MODEL is not set, default to $CMAQ_REPO
+### if [ CMAQ_MODEL == true ]
+### then
+###    echo "         Model repository path: $CMAQ_MODEL"
+### else
+ Blder="/home/ubuntu/CMAQ/UTIL/bldmake/bldmake_gcc.exe -serial -verbose"
 
+ Bld=$CMAQ_HOME/PREP/icon/scripts/BLD_ICON_${VRSN}_${compilerString}
  echo "Bld IS $Bld"
 
  if [ ! -e "$Bld" ]
@@ -89,13 +107,13 @@
 
 #> make the config file
 
- Cfile=$CFG.bld
+ Cfile=${CFG}.bld
  quote='"'
 
  echo                                                               > $Cfile
  echo "model       $EXEC;"                                         >> $Cfile
  echo                                                              >> $Cfile
- echo "repo        $BCON_SRC;"                                     >> $Cfile
+ echo "repo        $ICON_SRC;"                                     >> $Cfile
  echo                                                              >> $Cfile
  echo "lib_base    $xLib_Base;"                                    >> $Cfile
  echo                                                              >> $Cfile
@@ -127,7 +145,8 @@
  echo "netcdff      $quote$LIB3$quote;"                            >> $Cfile
  echo                                                              >> $Cfile
 
- echo "// project repository location: ${BCON_SRC}"                >> $Cfile
+
+ echo "// project repository location: ${ICON_SRC}"                >> $Cfile
  echo                                                              >> $Cfile
 
  text="common"
@@ -155,66 +174,26 @@
 #> Create Makefile and Model Executable
 # ============================================================================
 
-# unalias mv rm
-
-#> Recompile BLDMAKE from source if requested or if it does not exist
-# cd ${CMAQ_REPO}/UTIL/bldmake/scripts
-# ./bldit_bldmake.sh
- Blder="/home/ubuntu/CMAQ/UTIL/bldmake/bldmake_gcc.exe -serial -verbose"
+echo "Bld $Bld"
+echo "Blder $Blder"
 
 #> Relocate to the BLD_* directory 
- cd $Bld
+cd $Bld
 
-echo "HAVE ARRIVED AT BREAK 1"
-
-# Set BCON debug flags if true
- if [ Debug_BCON==true ]
- then
-    Blder="${Blder} -debug_cctm"
- fi
 
 #> Run BLDMAKE Utility
-# if [ MakeFileOnly==true ]
-# then
-#    if [ CopySrc==true ]
-#    then
-#       $Blder -makefo $Cfile
-#    else
-       $Blder -makefo -git_local $Cfile   # $Cfile = ${CFG}
-#     # totalview -a $Blder -makefo $Cfile
-#    fi
-# else   # also compile the model
-#    if [ CopySrc==true ]
-#    then
-#       $Blder $Cfile
-#    else
-#       $Blder -git_local $Cfile
-#    fi
-# fi
+$Blder -makefo -git_local $Cfile   # $Cfile = ${CFG}
 
 #> Rename Makefile to specify compiler option and link back to Makefile
  mv Makefile Makefile.$compilerString
- if [ -e Makefile.$compilerString ] && [ -e Makefile ] 
+ if [ -e Makefile.$compilerString ] && [ -e Makefile ]
  then
    rm Makefile
  fi
  ln -s Makefile.$compilerString Makefile
+ 
 
-#> Alert user of error in BLDMAKE if it ocurred
- if [ $status != 0 ]
- then
-    echo "   *** failure in $Blder ***"
-    exit 1
- fi
-
-#> Preserve old Config file, if it exists, before moving new one to 
-#> build directory.
- if [ -e "$Bld/${CFG}" ]
- then
-    echo "   >>> previous ${CFG} exists, re-naming to ${CFG}.old <<<"
-#    unalias mv
-    mv $Bld/${CFG} $Bld/${CFG}.old
- fi
  mv ${CFG}.bld $Bld/${CFG}
 
  exit
+
