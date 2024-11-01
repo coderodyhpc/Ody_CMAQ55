@@ -96,8 +96,8 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
 
  ModGrid=grid/cartesian            #> grid configuration module
 
- DepMod=m3dry                      #> m3dry or stage
-# DepMod=stage
+# DepMod=m3dry                      #> m3dry or stage
+ DepMod=stage
  ModAdv=wrf_cons                   #> 3-D Advection Scheme [Options: wrf_cons (default), local_cons]
  ModHdiff=hdiff/multiscale         #> horizontal diffusion module
  ModVdiff=vdiff/acm2_${DepMod}     #> vertical diffusion module (see $CMAQ_MODEL/CCTM/src/vdiff)
@@ -111,7 +111,7 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
                                    #>     (see $CMAQ_MODEL/CCTM/src/spcs)
  ModPhot=phot/inline               #> photolysis calculation module
                                    #>     (see $CMAQ_MODEL/CCTM/src/phot)
- Mechanism=cb6r5_ae7_aq            #> chemical mechanism (see $CMAQ_MODEL/CCTM/src/MECHS)
+ Mechanism=cracmm2                 #> chemical mechanism (see $CMAQ_MODEL/CCTM/src/MECHS)
  ModMech=MECHS/${Mechanism}
 # if [ ${Mechanism} =~ *ae7* ]; then       #> ae7 family of aero and cloud chem
  ModAero=aero/aero7                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
