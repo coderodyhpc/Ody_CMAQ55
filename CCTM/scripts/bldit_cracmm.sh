@@ -114,14 +114,14 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
  Mechanism=cracmm2                 #> chemical mechanism (see $CMAQ_MODEL/CCTM/src/MECHS)
  ModMech=MECHS/${Mechanism}
 # if [ ${Mechanism} =~ *ae7* ]; then       #> ae7 family of aero and cloud chem
- ModAero=aero/aero7                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
- ModCloud=cloud/acm_ae7               # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
+# ModAero=aero/aero7                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
+# ModCloud=cloud/acm_ae7               # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
 # elif [ ${Mechanism} =~ *ae6* ]; then     #> ae6 family of aero and cloud chem
 #     ModAero=aero/aero6                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
 #     ModCloud=cloud/acm_ae6               # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
 # elif [ ${Mechanism} =~ *cracmm* ]; then  #> CRACMM family of aero and cloud chem
-#     ModAero=aero/cracmm                  # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
-#     ModCloud=cloud/acm_cracmm            # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
+ ModAero=aero/cracmm                  # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
+ ModCloud=cloud/acm_cracmm            # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
 # fi
 
 # Gas chem solver
