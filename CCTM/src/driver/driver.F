@@ -204,6 +204,7 @@ C-----------------------------------------------------------------------
          END IF
 
 #ifdef mpas
+         write (*,*) "MPAS"
          CALL MPCOMM_INIT( NPROCS, MYPE, BEGTIME, LMODE )
 
          IO_PE_INCLUSIVE = .TRUE.
@@ -235,7 +236,7 @@ C and define vertical layer structure (in module GRID_CONF)
          END IF
 
 #else
-
+         write (*,*) "ALEA"
 C Set up horizontal domain, calculate processor-to-subdomain maps
 C and define vertical layer structure (in module GRID_CONF)
          IF ( .NOT. GRID_INIT ( NPROCS, MYPE ) ) THEN
@@ -363,6 +364,7 @@ C Convention: the input file concentration units are always ppmV.
          JDATE = STDATE; JTIME = STTIME
 
 #ifndef mpas
+         write (*,*) "ALEA-2"
          CALL CKSUMMER ( 'INITSCEN', CGRID, JDATE, JTIME )
 
          IF ( LIPR .OR. LIRR ) CALL PA_INIT ( CGRID, JDATE, JTIME, TSTEP )
@@ -383,6 +385,7 @@ C Verify input file header consistency and run duration
          END IF
 
 #else
+         write (*,*) "MPAS-2"
 !       if (.not. lus_init (mminlu_mpas, lufrac_data(:,:,1)) ) then
 !          CALL M3EXIT( 'DRIVER',JDATE,JTIME,'ERROR: Cannot initialize Land Use Category', 2)
 !       end if
@@ -447,6 +450,7 @@ C Main processing loop:
       MODEL_JTIME = JTIME
 
 #ifdef mpas
+      write (*,*) "MPAS-3"
 
       mpas_cmaq_last_step = LAST_STEP
 
@@ -494,6 +498,7 @@ C Main processing loop:
  
       NREPS = 1
 #else
+      write (*,*) "ALEA-3"
 C Get synchronization and advection time steps, TSTEP(2), ASTEP(L) and NREPS
       CALL ADVSTEP ( JDATE, JTIME, TSTEP, ASTEP, NREPS )
 
@@ -565,6 +570,7 @@ C Use trapezoidal rule to time-average data
       END DO
 
 #ifndef mpas
+      write (*,*) "ALEA-4"
       IF ( MOD( TIME2SEC( JTIME ), TIME2SEC( TSTEP( 1 ) ) ) .EQ. 0 ) THEN
          DIVFAC = 0.5 / FLOAT( myNREPS )
          myNREPS = 0
@@ -613,13 +619,16 @@ C write conc fields
       END IF
 
 #else
+      write (*,*) "MPAS-4"
       CALL UNLOAD_CGRID (CGRID)
 #endif
 
       IF ( LAST_STEP ) THEN
 #ifdef mpas
+         write (*,*) "MPAS-5"
          call mio_shutdown()
 #else
+         write (*,*) "ALEA-5"
 C write CGRID state file for subsequent runs
          CALL WR_CGRID ( CGRID, JDATE, JTIME, TSTEP( 1 ) )
 
