@@ -501,29 +501,7 @@ C Get synchronization and advection time steps, TSTEP(2), ASTEP(L) and NREPS
          DO V = 1, N_ASPCS
             S = AVG_CONC_MAP( V )
             AGRID( :,:,:,V ) = CGRID( :,:,ACONC_BLEV:ACONC_ELEV,S )
-#ifdef sens
-            DO NP = 1, NPMAX
-               SAGRID( :,:,:,NP,V ) = SENGRID( :,:,ACONC_BLEV:ACONC_ELEV,NP,S )
-            END DO
-#endif if
          END DO
-#ifdef isam
-            IF ( AISAM_ELEV .EQ. -1 ) AISAM_ELEV = NLAYS
-
-            DO ITAG = 1, NTAG_SA ! average isam
-               DO V = 1, NSPC_SA
-                  L = 0
-                  DO K = AISAM_BLEV, AISAM_ELEV
-                     L = L + 1
-                     DO R = 1, NROWS
-                        DO C = 1, NCOLS
-                           AISAM( C,R,L,V,ITAG ) = ISAM( C,R,K,V,ITAG )
-                        END DO
-                     END DO
-                  END DO
-               END DO
-            END DO
-#endif
 
          IF ( W_VEL )
      &      AVG_WVEL( :,:,: ) = WVEL( :,:,ACONC_BLEV:ACONC_ELEV )
@@ -570,12 +548,6 @@ C Use trapezoidal rule to time-average data
             S = AVG_CONC_MAP( V )
             AGRID( :,:,:,V ) = AGRID( :,:,:,V )
      &            + 2.0 * CGRID( :,:,ACONC_BLEV:ACONC_ELEV,S )
-#ifdef sens
-            DO NP = 1, NPMAX
-               SAGRID( :,:,:,NP,V ) = SAGRID( :,:,:,NP,V )
-     &            + 2.0 * SENGRID( :,:,ACONC_BLEV:ACONC_ELEV,NP,S )
-            END DO
-#endif 
          END DO
          IF ( W_VEL )
      &      AVG_WVEL( :,:,: ) = AVG_WVEL + 2.0 * WVEL( :,:,ACONC_BLEV:ACONC_ELEV )
@@ -585,24 +557,6 @@ C Use trapezoidal rule to time-average data
      &      AVG_TA( :,:,: ) = AVG_TA + 2.0 * MET_DATA%TA( :,:,ACONC_BLEV:ACONC_ELEV )
          IF ( L_ACONC_PRES )
      &      AVG_PRES( :,:,: ) = AVG_PRES + 2.0 * MET_DATA%PRES( :,:,ACONC_BLEV:ACONC_ELEV )
-
-#ifdef isam
-         ! average isam
-         DO ITAG = 1, NTAG_SA
-            DO V = 1, NSPC_SA
-               L = 0
-               DO K = AISAM_BLEV, AISAM_ELEV
-                  L = L + 1
-                  DO R = 1, NROWS
-                     DO C = 1, NCOLS
-                        AISAM( C,R,L,V,ITAG ) = AISAM( C,R,L,V,ITAG )
-     &                                        + 2.0 * ISAM( C,R,K,V,ITAG )
-                     END DO
-                  END DO
-               END DO
-            END DO
-         END DO
-#endif
 
 #endif
          ! OUTPUT DIAGNOSTIC INFORMATION
@@ -619,12 +573,6 @@ C Use trapezoidal rule to time-average data
             S = AVG_CONC_MAP( V )
             AGRID( :,:,:,V ) = DIVFAC * ( AGRID( :,:,:,V )
      &           - CGRID( :,:,ACONC_BLEV:ACONC_ELEV,S ) )
-#ifdef sens
-            DO NP = 1, NPMAX
-               SAGRID( :,:,:,NP,V ) = DIVFAC * ( SAGRID( :,:,:,NP,V )
-     &           - SENGRID( :,:,ACONC_BLEV:ACONC_ELEV,NP,S ) )
-            END DO
-#endif
          END DO
          IF ( W_VEL )
      &         AVG_WVEL( :,:,: ) = DIVFAC * ( AVG_WVEL( :,:,: ) - WVEL( :,:,ACONC_BLEV:ACONC_ELEV ) )
@@ -634,23 +582,6 @@ C Use trapezoidal rule to time-average data
      &         AVG_TA( :,:,: ) = DIVFAC * ( AVG_TA - MET_DATA%TA( :,:,ACONC_BLEV:ACONC_ELEV ) )
          IF ( L_ACONC_PRES )
      &         AVG_PRES( :,:,: ) = DIVFAC * ( AVG_PRES - MET_DATA%PRES( :,:,ACONC_BLEV:ACONC_ELEV ) )
-
-#ifdef isam
-         DO ITAG = 1, NTAG_SA ! average isam
-            DO V = 1, NSPC_SA
-               L = 0
-               DO K = AISAM_BLEV, AISAM_ELEV
-                  L = L + 1
-                  DO R = 1, NROWS
-                     DO C = 1, NCOLS
-                        AISAM( C,R,L,V,ITAG ) = DIVFAC * ( AISAM(C,R,L,V,ITAG )
-     &                                        -            ISAM( C,R,K,V,ITAG ) )
-                     END DO
-                  END DO
-               END DO
-            END DO
-         END DO
-#endif
 
       END IF
 
@@ -673,14 +604,6 @@ C write conc fields
          IF ( LVEXT ) CALL WR_VEXT ( CGRID, JDATE, JTIME, TSTEP( 1 ) )
 #endif
          CALL WR_ACONC ( AGRID, JDATE, JTIME, TSTEP( 1 ) )
-#ifdef isam
-         CALL WR_SA     ( JDATE, JTIME, TSTEP, 1 )
-         CALL WR_AVG_SA ( JDATE, JTIME, TSTEP( 1 ) )
-#endif
-
-#ifdef sens
-         CALL WR_ASENS ( JDATE, JTIME, TSTEP( 1 ) )
-#endif
          IF ( L_ELMO ) CALL WRITE_ELMO( JDATE, JTIME, TSTEP, INIT_TIME=.FALSE. )
 
          IF ( LIPR .OR. LIRR ) CALL PA_OUTPUT ( CGRID, JDATE, JTIME )
@@ -688,12 +611,6 @@ C write conc fields
          IF ( PRINT_PROC_TIME ) CALL TIMING_SPLIT ( CPU_TIME_START, 3 )
          
       END IF
-
-#ifdef twoway
-      IF ( SD_TIME_SERIES ) THEN
-         CALL OUTPUT_SD_TIME_SERIES ( CGRID, JDATE, JTIME )
-      END IF
-#endif
 
 #else
       CALL UNLOAD_CGRID (CGRID)
@@ -705,12 +622,6 @@ C write conc fields
 #else
 C write CGRID state file for subsequent runs
          CALL WR_CGRID ( CGRID, JDATE, JTIME, TSTEP( 1 ) )
-#ifdef isam
-         CALL WR_SA_CGRID ( JDATE, JTIME, TSTEP( 1 ) )
-#endif
-#ifdef sens
-         CALL WR_SENGRID ( JDATE, JTIME, TSTEP( 1 )  )
-#endif
 
 C Shut down IOAPI
          IF ( SHUT3() ) THEN
