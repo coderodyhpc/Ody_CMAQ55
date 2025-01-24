@@ -1,107 +1,6 @@
-
-!------------------------------------------------------------------------!
-!  The Community Multiscale Air Quality (CMAQ) system software is in     !
-!  continuous development by various groups and is based on information  !
-!  from these groups: Federal Government employees, contractors working  !
-!  within a United States Government contract, and non-Federal sources   !
-!  including research institutions.  These groups give the Government    !
-!  permission to use, prepare derivative works of, and distribute copies !
-!  of their work in the CMAQ system to the public and to permit others   !
-!  to do so.  The United States Environmental Protection Agency          !
-!  therefore grants similar permission to use the CMAQ system software,  !
-!  but users are requested to provide copies of derivative works or      !
-!  products designed to operate in the CMAQ system to the United States  !
-!  Government without restrictions as to use by others.  Software        !
-!  that is used with the CMAQ system but distributed under the GNU       !
-!  General Public License or the GNU Lesser General Public License is    !
-!  subject to their copyright restrictions.                              !
-!------------------------------------------------------------------------!
-
-C:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
       SUBROUTINE CMAQ_DRIVER ( MODEL_STDATE, MODEL_STTIME, MODEL_TSTEP,
      $                         MODEL_JDATE, MODEL_JTIME, LAST_STEP,
      $                         COUPLE_TSTEP, NCOLS_IN, NLAYS_IN)
-
-C-----------------------------------------------------------------------
-C Function:
-C    CMAQ CTM driver
- 
-C Preconditions:
-C    Initialized file CONCFILE for output; completed
-C    files HISTORY containing initial conditions, SPCCONST for
-C    conversion of concentration field from computational units
-C    to output units.
- 
-C Subroutines and functions called:
-C    INITSCEN, ADVSTEP, M3EXIT, WRITE3
-C    science processes SCIPROC, PA_OUTPUT
- 
-C Revision History:
-C    prototype 6/92 by CJC for proof-of-concept
-C    Revised   2/93 by CJC for initial LCM Prototype Alpha
- 
-C    31 August, 1995 by M. Talat Odman at NCSC: special version for one 
-C    single grid
- 
-C    16 April 1995 by M. Talat Odman at NCSC: write (or rewrite if restart)
-C    initial conditions to the output file
-
-C    Jeff
-C    18 June 98 - put load of mechanism common here because of ping/ping_noop,
-C    chem/chem_noop options
-
-C    2 October, 1998 by Al Bourgeois at LM: parallel implementation
-C    Jeff - Dec 00 - move CGRID_MAP into f90 module, re-order cols/rows in
-C    call to PAR_INIT
-C    Jeff - Jul 01 - enable integral average conc data
-C    Sep 01  J. Young        Dyn Alloc - Use HGRD_DEFN
-
-C    3 Sep 01 David wong
-C      -- removed M3IO SHUT3 call which is done in PAR_TERM
-C      -- removed SET_CTMFILE call
-
-C   23 Jun 03 J.Young: for layer dependent advection tstep
-C   18 Aug 03 J. Pleim - move vdiff before advection
-C   07 Dec 04 J.Young: for layer dyn alloc - Use VGRD_DEFN
-C   30 May 05 J.Young: mass-conserving advection (yamo)
-C   20 Jan 06 J.Young: add circular buffer CGRID state file
-C   24 May 06 J.Young: par_init/pio_init col/row order check
-C    6 Sep 06 J.Young: one-write cgrid file; SGRID in module
-C   27 May 09 J.Young: re-do parallel processing initialization
-C   21 Jun 10 J.Young: convert for Namelist redesign
-C   20 Jul 10 J.Young: re-do serial processing termination (eliminate par_noop)
-C   16 Feb 11 S.Roselle: replaced I/O API include files with UTILIO_DEFN
-C   11 May 11 D.Wong: incorporated twoway model implementation
-C   24 Aug 11 D.Wong: eliminated data and geo orientation in se_init call
-C    8 Jan 13 C.Nolte: fixed load AGRID bug if TSTEP(1) .ne. 010000 hhmmss
-C   24 Sep 13 D.Wong:  Computed AGRID at the output mark of the model
-C                      indicated in TSTEP(1) for twoway model
-C   21 Apr 14 D.Wong:  Removed M3EXIT call in SHUT3 block
-C   07 Jul 14 B.Hutzell: replaced mechanism include file(s) with fortran module
-C   10 Aug 15 D.Wong:  Replaced MYPE with IO_PE_INCLUSIVE for parallel
-C                      I/O implementation
-C   10 Dec 15 D.Wong:  Moved the code which determines which processors are involved
-C                      in I/O processing in front of routine PIO_RE_INIT and passed
-C                      that information into PIO_RE_INIT
-C   26 Jan 16 J.Young: Consolidate PIO_INIT, use keywords for optional arguments
-C   28 Jan 16 D.Wong:  Add SAVE attribute to TSTEP for the two-way model implementation
-C   16 Sep 16 J.Young: update for inline procan (IRR)
-C   29 Nov 17 D. Wong: removed all SWAP routines and replaced with SE_COMM
-C   29 Oct 18 L.Zhou, S.Napelenok: isam implementation
-C   31 Jan 19 D. Wong: adopted the idea to process all twoway related environment
-C                      variables in one place
-C   01 Feb 19 D. Wong: made this as a subroutine rather than the main program to
-C                      accommodate interface with global, regional and offlice mode,
-C                      implemented centralized I/O approach, removed all MY_N clauses,
-C                      with new re-structure of LUS_DEFN, most of the data declaration 
-C                      has been moved to lus_data_module (model_data_module.f) and to
-C                      call lus_setup to setup land use information according to land
-C                      use scheme
-C   02 Aug 19 F. Sidi: Restored serial processing option
-C   03 AUG 19 D.Wong:  Modified code to work with two-way model
-C   09 Sep 19 F. Sidi: Replaced L_CONC_WVEL & L_ACONC_WVEL (depreciated) with W_VEL
-C   21 Nov 19 S.L.Napelenok: Include DDM3D for versions 5.3.1
-C-----------------------------------------------------------------------
 
       USE RXNS_DATA             ! chemical mechanism data
       USE CENTRALIZED_IO_MODULE
@@ -135,27 +34,10 @@ C-----------------------------------------------------------------------
 
       USE BIDI_MOD, Only : INIT_BIDI
 
-#ifdef isam
-c     USE SA_LAYERS
-      USE SA_DEFN
-      USE PISAM_DEFN            ! SA array definition (borrowed )
-c     USE PMFRC_DEFN            ! MAPFRAC array definition ( adapted )
-#endif
-
-#ifdef sens
-      USE DDM3D_DEFN
-      USE S_PCGRID_DEFN
-#endif
-
 #ifdef parallel
       USE VERTEXT_MODULE
 #endif
       USE lus_data_module
-
-#ifdef twoway
-      use twoway_data_module
-      use sd_time_series_module
-#endif
 
 #ifdef parallel
       USE SE_MODULES            ! stenex (using SE_INIT_MODULE)
@@ -281,31 +163,6 @@ C Local variables:
             REAL, POINTER            :: CGRID( :,:,:,: )
             INTEGER, INTENT( IN )    :: JDATE, JTIME
          END SUBROUTINE PA_OUTPUT
-#ifdef isam
-         SUBROUTINE WR_SA ( JDATE, JTIME, TSTEP, NSTEPS )
-            IMPLICIT NONE
-            INTEGER                  :: JDATE, JTIME, TSTEP( 3 )
-            INTEGER                  :: NSTEPS
-         END SUBROUTINE WR_SA
-         SUBROUTINE WR_AVG_SA ( JDATE, JTIME, TSTEP )
-            IMPLICIT NONE
-            INTEGER                  :: JDATE, JTIME, TSTEP
-         END SUBROUTINE WR_AVG_SA
-         SUBROUTINE WR_SA_CGRID ( JDATE, JTIME, TSTEP )
-            IMPLICIT NONE
-            INTEGER                  :: JDATE, JTIME, TSTEP
-         END SUBROUTINE WR_SA_CGRID
-#endif
-#ifdef sens
-         SUBROUTINE WR_SENGRID ( JDATE, JTIME, TSTEP )
-            IMPLICIT NONE
-            INTEGER, INTENT( IN )    :: JDATE, JTIME, TSTEP
-         END SUBROUTINE WR_SENGRID
-         SUBROUTINE WR_ASENS ( JDATE, JTIME, TSTEP )
-            IMPLICIT NONE
-            INTEGER, INTENT( IN )    :: JDATE, JTIME, TSTEP
-         END SUBROUTINE WR_ASENS
-#endif
 #endif
 
          SUBROUTINE SCIPROC ( CGRID, JDATE, JTIME, TSTEP, ASTEP )
@@ -332,12 +189,7 @@ C-----------------------------------------------------------------------
          STTIME     = MODEL_STTIME
 #endif
 
-#ifdef twoway
-         TSTEP( 1 ) = LOCAL_TSTEP
-         TSTEP( 3 ) = SEC2TIME(MODEL_TSTEP)
-#else
          TSTEP( 1 ) = MODEL_TSTEP
-#endif
 
          IF (PRESENT (COUPLE_TSTEP)) THEN
             TSTEP( 3 ) = SEC2TIME( COUPLE_TSTEP )
@@ -383,12 +235,6 @@ C and define vertical layer structure (in module GRID_CONF)
          END IF
 
 #else
-#ifdef twoway
-C Initialize Environment Variables
-         JDATE = 0
-         JTIME = 0
-         CALL INIT_ENV_VARS( JDATE, JTIME )
-#endif
 
 C Set up horizontal domain, calculate processor-to-subdomain maps
 C and define vertical layer structure (in module GRID_CONF)
@@ -414,11 +260,6 @@ C Set CGRID mechanism
             XMSG = 'Error in CGRID_SPCS:CGRID_SPCS_INIT'
             CALL M3EXIT ( PNAME, JDATE, JTIME, XMSG, 1 )
          END IF
-
-#ifdef sens
-C Initialize ddm3d calculations
-         CALL INIT_DDM3D
-#endif
 
         CALL MAP_AERO()
 
@@ -492,44 +333,11 @@ C Miscellaneous Configuration Operations
          WRITE( LOGDEV, * )
          CALL LOG_HEADING( LOGDEV, "Configure Scenario" )
 
-#ifdef isam
-c        CALL GET_SA_LAYS ()
-         CALL SA_DIM()
-
-C Initialize PISAM
-         IF ( .NOT. PISAM_INIT ( NSPC_SA, NTAG_SA ) ) THEN
-            XMSG = 'Failure in defining SA horizontal domain'
-            CALL M3EXIT ( PNAME, JDATE, JTIME, XMSG, XSTAT2  )
-         END IF
-         ISAM => PISAM( 1:NCOLS,1:NROWS,:,:,: )
-
-#endif
-
 C Initialize optional derived vertical velocity writes to conc file
          IF ( .NOT. WVEL_INIT () ) THEN
             XMSG = 'Failure initializing derived vertical velocity writes'
             CALL M3EXIT ( PNAME, JDATE, JTIME, XMSG, XSTAT2  )
          END IF
-
-#ifdef sens
-C Initialize ddm3d calculations
-         IF ( .NOT. S_PCGRID_IN( NPMAX ) ) THEN
-            XMSG = 'Failure defining horizontal sens domain'
-            CALL M3EXIT ( PNAME, 0, 0, XMSG, XSTAT2  )
-         END IF
-
-         SENGRID => S_PCGRID(1:NCOLS,1:NROWS,:,:,:)
-         SENGRID_TEMP => S_PCGRID_TEMP(1:NCOLS,1:NROWS,:,:)
-
-         ALLOCATE ( SAGRID( NCOLS,NROWS,A_NLYS,NPMAX,N_ASPCS ), STAT = STATUS)
-         IF ( STATUS .NE. 0 ) THEN
-            XMSG = 'SAGRID memory allocation failed'
-            CALL M3EXIT ( PNAME, 0, 0, XMSG, XSTAT1 )
-         END IF
-
-         SAGRID = 0.0
-#endif
-
 
 #endif  ! end of mpas
 
@@ -554,10 +362,6 @@ C Convention: the input file concentration units are always ppmV.
          CALL INITSCEN ( CGRID, TSTEP )
          JDATE = STDATE; JTIME = STTIME
 
-#ifdef sens
-         STARTDATE = STDATE   ! save variable into DDM3D module
-#endif
-
 #ifndef mpas
          CALL CKSUMMER ( 'INITSCEN', CGRID, JDATE, JTIME )
 
@@ -578,27 +382,6 @@ C Verify input file header consistency and run duration
             CALL M3EXIT ( PNAME, JDATE, JTIME, XMSG, XSTAT1 )
          END IF
 
-#ifdef isam
-         ALLOCATE ( AISAM( NCOLS,NROWS,NLAYS,NSPC_SA,NTAG_SA ),STAT = ALLOCSTAT )
-         IF ( ALLOCSTAT .NE. 0 ) THEN
-            XMSG = 'AISAM memory allocation failed'
-            CALL M3EXIT ( PNAME, JDATE, JTIME, XMSG, XSTAT1 )
-         END IF
-         AISAM = 0.
-#endif
-
-
-
-#ifdef twoway
-         IF ( SD_TIME_SERIES ) THEN
-            CALL SD_TIME_SERIES_INIT ( LOGDEV, TSTEP( 3 ) )
-            CALL OUTPUT_SD_TIME_SERIES ( CGRID, JDATE, JTIME )
-         END IF
-
-         IF ( CMAQ_WRF_FEEDBACK ) THEN
-            CALL FEEDBACK_SETUP ( JDATE, JTIME, TSTEP( 3 ) )
-         END IF
-#endif
 #else
 !       if (.not. lus_init (mminlu_mpas, lufrac_data(:,:,1)) ) then
 !          CALL M3EXIT( 'DRIVER',JDATE,JTIME,'ERROR: Cannot initialize Land Use Category', 2)
