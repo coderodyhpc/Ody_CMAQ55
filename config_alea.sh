@@ -14,7 +14,7 @@
 
 #> Set the compiler option
  export compiler=gcc
- export Vrsn=14.2
+ export Vrsn=12.4
  echo "Compiler is set to $compiler"
 
 
@@ -54,12 +54,12 @@
 
         export WRF_ARCH=34
         #> I/O API, netCDF, and MPI library locations
-        export IOAPI_INCL_DIR=/opt/atrium/ioapi-3.2/Linux2_aarch64gfort14   #> I/O API include header files
-        export IOAPI_LIB_DIR=/opt/atrium/ioapi-3.2/Linux2_aarch64gfort14   #> I/O API libraries
-        export NETCDF_LIB_DIR=/opt/atrium/netcdf/lib                     #> netCDF C directory path
-        export NETCDF_INCL_DIR=/opt/atrium/netcdf/include                 #> netCDF C directory path
-        export NETCDFF_LIB_DIR=/opt/atrium/netcdf/lib                     #> netCDF Fortran directory path
-        export NETCDFF_INCL_DIR=/opt/atrium/netcdf/include                 #> netCDF Fortran directory path
+        export IOAPI_INCL_DIR=/opt/atrium/ioapi-3.2/Linux2_aarch64gfort11   #> I/O API include header files
+        export IOAPI_LIB_DIR=/opt/atrium/ioapi-3.2/Linux2_aarch64gfort11   #> I/O API libraries
+        export NETCDF_LIB_DIR=/opt/aula/netcdf/lib                     #> netCDF C directory path
+        export NETCDF_INCL_DIR=/opt/aula/netcdf/include                 #> netCDF C directory path
+        export NETCDFF_LIB_DIR=/opt/aula/netcdf/lib                     #> netCDF Fortran directory path
+        export NETCDFF_INCL_DIR=/opt/aula/netcdf/include                 #> netCDF Fortran directory path
         export MPI_LIB_DIR=/opt/atrium/openmpi/lib                    #> MPI directory path
 
         echo "MPI $MPI_LIB_DIR "
@@ -70,8 +70,8 @@
         export myCC=/opt/atrium/openmpi/bin/mpicc
         export myFSTD=""
         export myDBG="-Wall -O0 -g -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace"
-        export myFFLAGS="-ffixed-form -ffixed-line-length-132 -finit-character=32 -O3 -mcpu=neoverse-v2 -fallow-argument-mismatch -fallow-invalid-boz"
-        export myFRFLAGS="-ffree-form -ffree-line-length-none -finit-character=32 -O3 -mcpu=neoverse-v2 -fallow-argument-mismatch -fallow-invalid-boz"
+        export myFFLAGS="-ffixed-form -ffixed-line-length-132 -finit-character=32 -O3 -fallow-argument-mismatch -fallow-invalid-boz"
+        export myFRFLAGS="-ffree-form -ffree-line-length-none -finit-character=32 -O3 -fallow-argument-mismatch -fallow-invalid-boz"
         export myCFLAGS="-O2"
 #        export myLINK_FLAG= # "-fopenmp" openMP not supported w/ CMAQ
         export extra_lib=""
