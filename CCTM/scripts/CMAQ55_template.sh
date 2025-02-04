@@ -18,7 +18,7 @@
 
 #> Choose compiler
  export compiler=gcc
- export Vrsn=14.2
+ export Vrsn=11.4
  export compilerString=${compiler}${compilerVrsn}
 
 #> Set General Parameters for Configuring the Simulation
@@ -63,10 +63,10 @@
  TSTEP=010000            #> output time step interval (HHMMSS)
 
 #> Horizontal domain decomposition - assuming MPI
-   NPCOL=4
-   NPROW=2
-   NPROCS=$((NPCOL*NPROW))
-   export NPCOL_NPROW="$NPCOL $NPROW"
+ NPCOL=4
+ NPROW=2
+ NPROCS=$((NPCOL*NPROW))
+ export NPCOL_NPROW="$NPCOL $NPROW"
 
 #> Define Execution ID: e.g. [CMAQ-Version-Info]_[User]_[Date]_[Time]
 export EXECUTION_ID="CMAQ_CCTM${VRSN}_`id -u -n`_`date -u +%Y%m%d_%H%M%S_%N`"    #> Inform IO/API of the Execution ID
@@ -98,17 +98,17 @@ NY=`grep -A 1 ${GRID_NAME} ${GRIDDESC} | tail -1 | sed 's/  */ /g' | cut -d' ' -
 NCELLS=`echo "${NX} * ${NY} * ${NZ}" | bc -l`
 
 #> Output Species and Layer Options
-   #> CONC file species; comment or set to "ALL" to write all species to CONC
-   export CONC_SPCS="O3 NO ANO3I ANO3J NO2 FORM ISOP NH3 ANH4I ANH4J ASO4I ASO4J"
-   export CONC_BLEV_ELEV=" 1 1" #> CONC file layer range; comment to write all layers to CONC
+#> CONC file species; comment or set to "ALL" to write all species to CONC
+export CONC_SPCS="O3 NO ANO3I ANO3J NO2 FORM ISOP NH3 ANH4I ANH4J ASO4I ASO4J"
+export CONC_BLEV_ELEV=" 1 1" #> CONC file layer range; comment to write all layers to CONC
 
-   #> ACONC file species; comment or set to "ALL" to write all species to ACONC
-   #export AVG_CONC_SPCS="O3 NO CO NO2 ASO4I ASO4J NH3"
-   export AVG_CONC_SPCS="ALL"
-   export ACONC_BLEV_ELEV=" 1 1" #> ACONC file layer range; comment to write all layers to ACONC
-   export AVG_FILE_ENDTIME=N     #> override default beginning ACONC timestamp [ default: N ]
+#> ACONC file species; comment or set to "ALL" to write all species to ACONC
+#export AVG_CONC_SPCS="O3 NO CO NO2 ASO4I ASO4J NH3"
+export AVG_CONC_SPCS="ALL"
+export ACONC_BLEV_ELEV=" 1 1" #> ACONC file layer range; comment to write all layers to ACONC
+export AVG_FILE_ENDTIME=N     #> override default beginning ACONC timestamp [ default: N ]
 
-   #> Synchronization Time Step and Tolerance Options
+#> Synchronization Time Step and Tolerance Options
 export CTM_MAXSYNC=300       #> max sync time step (sec) [ default: 720 ]
 export CTM_MINSYNC=60        #> min sync time step (sec) [ default: 60 ]
 export SIGMA_SYNC_TOP=0.7    #> top sigma level thru which sync step determined [ default: 0.7 ]
