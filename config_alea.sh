@@ -14,7 +14,7 @@
 
 #> Set the compiler option
  export compiler=gcc
- export Vrsn=12.4
+ export Vrsn=11.4
  echo "Compiler is set to $compiler"
 
 
@@ -56,10 +56,10 @@
         #> I/O API, netCDF, and MPI library locations
         export IOAPI_INCL_DIR=/opt/atrium/ioapi-3.2/Linux2_aarch64gfort11   #> I/O API include header files
         export IOAPI_LIB_DIR=/opt/atrium/ioapi-3.2/Linux2_aarch64gfort11   #> I/O API libraries
-        export NETCDF_LIB_DIR=/opt/aula/netcdf/lib                     #> netCDF C directory path
-        export NETCDF_INCL_DIR=/opt/aula/netcdf/include                 #> netCDF C directory path
-        export NETCDFF_LIB_DIR=/opt/aula/netcdf/lib                     #> netCDF Fortran directory path
-        export NETCDFF_INCL_DIR=/opt/aula/netcdf/include                 #> netCDF Fortran directory path
+        export NETCDF_LIB_DIR=/opt/culinam/netcdf/lib                     #> netCDF C directory path
+        export NETCDF_INCL_DIR=/opt/culinam/netcdf/include                 #> netCDF C directory path
+        export NETCDFF_LIB_DIR=/opt/culinam/netcdf/lib                     #> netCDF Fortran directory path
+        export NETCDFF_INCL_DIR=/opt/culinam/netcdf/include                 #> netCDF Fortran directory path
         export MPI_LIB_DIR=/opt/atrium/openmpi/lib                    #> MPI directory path
 
         echo "MPI $MPI_LIB_DIR "
