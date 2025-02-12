@@ -65,7 +65,7 @@ build_parallel_io=true   #> uncomment to build with parallel I/O (pnetcdf);
 #build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
                                        #>   comment out for off-line chemistry
 #> Two-way MPAS-CMAQ
-Build_mpas_cmaq=True
+build_mpas_cmaq=True
 #> Potential vorticity free-troposphere O3 scaling
 #potvortO3=True
 
@@ -498,7 +498,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo                                                              >> $Cfile
  echo "lib_4       ioapi/lib;"                                     >> $Cfile
  echo                                                              >> $Cfile
- text="$quote$CPP_FLAGS $PAR $SENS $PIO $cpp_depmod $POT $STX1 $STX2$quote;"
+ text="$quote$CPP_FLAGS $PAR $SENS $PIO $cpp_depmod $quote;"
  echo "cpp_flags   $text"                                          >> $Cfile
  echo                                                              >> $Cfile
  echo "f_compiler  $FC;"                                           >> $Cfile
@@ -569,6 +569,10 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 #    echo "Module ${ModTwoway};"                                    >> $Cfile
 #    echo                                                           >> $Cfile
 # fi
+
+ echo "// option set for MPAS-CMAQ coupled model"                  >> $Cfile
+ echo "Module ${Modmpascmaq};"                                     >> $Cfile
+ echo                                                              >> $Cfile
 
  text="driver"
  echo "// options are" $text                                       >> $Cfile
