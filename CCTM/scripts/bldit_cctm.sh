@@ -544,16 +544,16 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  text="stenex or se_noop"
  echo "// options are" $text                                       >> $Cfile
  echo "Module ${ModStenex};"                                       >> $Cfile
- if [ -n "$ParOpt" ]
- then
-    text="// parallel executable; stenex and pario included"
-    echo $text                                                     >> $Cfile
-    echo "Module ${ModPario};"                                     >> $Cfile
- else
-    text="serial executable; noop stenex"
-    echo $text                                                     >> $Cfile
- fi
- echo                                                              >> $Cfile
+ #if [ -n "$ParOpt" ]
+ #then
+ #   text="// parallel executable; stenex and pario included"
+ #   echo $text                                                     >> $Cfile
+ #   echo "Module ${ModPario};"                                     >> $Cfile
+ #else
+ #   text="serial executable; noop stenex"
+ #   echo $text                                                     >> $Cfile
+ #fi
+ #echo                                                              >> $Cfile
 
  text="par, par_nodistr and par_noop"
  echo "// options are" $text                                       >> $Cfile
