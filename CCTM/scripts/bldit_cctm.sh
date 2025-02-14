@@ -64,6 +64,8 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
 #> Two-way WRF-CMAQ
 #build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
                                        #>   comment out for off-line chemistry
+#> Two-way MPAS-CMAQ
+build_mpas_cmaq=True
 
 #> Potential vorticity free-troposphere O3 scaling
 #potvortO3=True
@@ -220,6 +222,10 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
 #    MakeFileOnly=true
 #    ModTwoway=twoway
 # fi
+
+ MakeFileOnly=true
+ Modmpascmaq=mpas_cmaq
+ ModMio=mio
 
 #> If parallel-io is selected, then make sure the multiprocessor
 #> option is also set.
@@ -560,6 +566,10 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 #    echo                                                           >> $Cfile
 # fi
 
+ echo "// option set for MPAS-CMAQ coupled model"                  >> $Cfile
+ echo "Module ${Modmpascmaq};"                                     >> $Cfile
+ echo                                                              >> $Cfile
+ 
  text="driver"
  echo "// options are" $text                                       >> $Cfile
  echo "Module driver;"                                             >> $Cfile
@@ -617,9 +627,14 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 
  text="megan3"
  echo "// options are" $text                                       >> $Cfile
- echo "Module ${ModMegBiog};"                                         >> $Cfile
+ echo "Module ${ModMegBiog};"                                      >> $Cfile
  echo                                                              >> $Cfile
 
+ text="mio"
+ echo "// options are" $text                                       >> $Cfile
+ echo "Module ${ModMio};"                                          >> $Cfile
+ echo                                                              >> $Cfile
+ 
  text="smoke"
  echo "// options are" $text                                       >> $Cfile
  echo "Module ${ModPlmrs};"                                        >> $Cfile
@@ -786,6 +801,12 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 # then
 #   bld_flags="${bld_flags} -twoway"
 # fi
+
+ if [ build_mpas_cmaq ]
+ then
+   bld_flags="${bld_flags} -mpascmaq"
+   ln -s Makefile.mpas_cmaq Makefile
+ fi
 
    echo "START Blder ___***____ $Blder $bld_flags $Cfile"
 #> Run BLDMAKE with source code in build directory
