@@ -544,7 +544,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  text="stenex or se_noop"
  echo "// options are" $text                                       >> $Cfile
  echo "Module ${ModStenex};"                                       >> $Cfile
- echo
+ echo                                                              >> $Cfile
 # if [ -n "$ParOpt" ]
 # then
  text="// parallel executable; stenex and pario included"
