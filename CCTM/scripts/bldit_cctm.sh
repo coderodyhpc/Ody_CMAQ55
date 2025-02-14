@@ -48,7 +48,7 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
                         #>   comment out for a single processor (serial) executable
 #DistrEnv=true                         #> uncomment to distribute environmental variables to multiple machines
                                        #>   comment out for a single processor (serial) executable (MPI only)
-build_parallel_io=true   #> uncomment to build with parallel I/O (pnetcdf);
+#build_parallel_io=true   #> uncomment to build with parallel I/O (pnetcdf);
                               #>   comment out to use standard netCDF I/O
 #Debug_CCTM=true        #> uncomment to compile CCTM with debug option equal to TRUE
                         #>   comment out to use standard, optimized compile process
@@ -64,8 +64,7 @@ build_parallel_io=true   #> uncomment to build with parallel I/O (pnetcdf);
 #> Two-way WRF-CMAQ
 #build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
                                        #>   comment out for off-line chemistry
-#> Two-way MPAS-CMAQ
-build_mpas_cmaq=True
+
 #> Potential vorticity free-troposphere O3 scaling
 #potvortO3=True
 
@@ -82,6 +81,7 @@ build_mpas_cmaq=True
 
  EXEC=CCTM_${VRSN}.exe          #> executable name
  CFG=CCTM_${VRSN}.cfg          #> configuration file name
+ echo "EXEC equals $EXEC $CFG"
 # if [ $build_twoway == "True" ]; then            # WRF Version used for WRF-CMAQ Model (must be v4.4+)
 #    WRF_VRSN=v4.4
 # fi
@@ -111,17 +111,17 @@ build_mpas_cmaq=True
                                    #>     (see $CMAQ_MODEL/CCTM/src/spcs)
  ModPhot=phot/inline               #> photolysis calculation module
                                    #>     (see $CMAQ_MODEL/CCTM/src/phot)
- Mechanism=cracmm2            #> chemical mechanism (see $CMAQ_MODEL/CCTM/src/MECHS)
+ Mechanism=cracmm2                 #> chemical mechanism (see $CMAQ_MODEL/CCTM/src/MECHS)
  ModMech=MECHS/${Mechanism}
 # if [ ${Mechanism} =~ *ae7* ]; then       #> ae7 family of aero and cloud chem
- ModAero=aero/aero7                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
- ModCloud=cloud/acm_ae7               # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
+# ModAero=aero/aero7                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
+# ModCloud=cloud/acm_ae7               # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
 # elif [ ${Mechanism} =~ *ae6* ]; then     #> ae6 family of aero and cloud chem
 #     ModAero=aero/aero6                   # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
 #     ModCloud=cloud/acm_ae6               # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
 # elif [ ${Mechanism} =~ *cracmm* ]; then  #> CRACMM family of aero and cloud chem
-#     ModAero=aero/cracmm                  # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
-#     ModCloud=cloud/acm_cracmm            # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
+ ModAero=aero/cracmm                  # > aerosol chemistry module (see $CMAQ_MODEL/CCTM/src/aero)
+ ModCloud=cloud/acm_cracmm            # > cloud chemistry module (see $CMAQ_MODEL/CCTM/src/cloud)
 # fi
 
 # Gas chem solver
@@ -160,7 +160,7 @@ build_mpas_cmaq=True
  export FC=${myFC}                     #> path of Fortan compiler; set in config.cmaq
  FP=$FC                       #> path of Fortan preprocessor; set in config.cmaq
  CC=${myCC}                   #> path of C compiler; set in config.cmaq
- export BLDER=${CMAQ_HOME}/UTIL/bldmake/bldmake_gcc.exe   #> name of model builder executable
+ export BLDER=${CMAQ_HOME}/UTIL/bldmake/bldmake_${compilerString}.exe   #> name of model builder executable
 
 #> Libraries/include files
 #LIOAPI="${IOAPI_DIR}/lib ${ioapi_lib}"      #> I/O API library directory
@@ -220,16 +220,6 @@ build_mpas_cmaq=True
 #    MakeFileOnly=true
 #    ModTwoway=twoway
 # fi
-
-#> If the two-way, coupled WRF-CMAQ model is being built,
-#> then just generate the Makefile. Don't compile.
-#if [ build_mpas_cmaq ]
-#then
- MakeFileOnly=true
- Modmpascmaq=mpas_cmaq
- ModMio=mio
-#fi
-
 
 #> If parallel-io is selected, then make sure the multiprocessor
 #> option is also set.
@@ -303,7 +293,7 @@ build_mpas_cmaq=True
 
 echo "End Multiprocessing"
 #> if DDM-3D is set, add the pre-processor flag for it.
- if [ -n "$DDM3D_CCTM" ]
+ if [ DDM3D_CCTM ]
  then
     SENS=( -Dsens )
  else
@@ -394,14 +384,14 @@ echo "SENS $SENS"
 #> If the source code is being copied to the build directory,
 #> then move the include files as well and direct the Makefile
 #> to the current directory.
- if [ -n "$CopySrc" ]
+ if [ CopySrc ]
  then
     /bin/cp -fp ${ICL_PAR}/*   ${Bld}
     /bin/cp -fp ${ICL_CONST}/* ${Bld}
     /bin/cp -fp ${ICL_FILES}/* ${Bld}
     /bin/cp -fp ${ICL_EMCTL}/* ${Bld}
 #    #/bin/cp -fp ${ICL_PA}/*    ${Bld}
-    if [ -n "$ParOpt" ]
+    if [ ParOpt ]
     then
 #       /bin/cp -fp ${ICL_MPI}/mpif.h ${Bld}
   echo " "
@@ -473,7 +463,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo " Cfile $Cfile"
 
  echo                                                               > $Cfile
- if [ -n "$make_options" ]
+ if [ make_options ]
  then
     echo "make_options $quote$make_options$quote;"                 >> $Cfile
     echo                                                           >> $Cfile
@@ -490,7 +480,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo                                                              >> $Cfile
  echo "lib_2       ioapi/include_files;"                           >> $Cfile
  echo                                                              >> $Cfile
- if [ -n "$ParOpt" ]
+ if [ ParOpt ]
  then
     echo "lib_3       ${quote}mpi -I.$quote;"                      >> $Cfile
     echo                                                           >> $Cfile
@@ -498,7 +488,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo                                                              >> $Cfile
  echo "lib_4       ioapi/lib;"                                     >> $Cfile
  echo                                                              >> $Cfile
- text="$quote$CPP_FLAGS $PAR $SENS $PIO $cpp_depmod $quote;"
+ text="$quote$CPP_FLAGS $PAR $SENS $PIO $cpp_depmod $POT $STX1 $STX2$quote;"
  echo "cpp_flags   $text"                                          >> $Cfile
  echo                                                              >> $Cfile
  echo "f_compiler  $FC;"                                           >> $Cfile
@@ -523,7 +513,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo                                                              >> $Cfile
  echo "netcdff     $quote$netcdff_lib$quote;"                      >> $Cfile
  echo                                                              >> $Cfile
- if [ -n "$ParOpt" ]
+ if [ ParOpt ]
  then
     echo "mpich       $quote$LIB3$quote;"                          >> $Cfile
     echo                                                           >> $Cfile
@@ -534,7 +524,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo "include SUBST_EMISPRM    $ICL_EMCTL/EMISPRM.EXT;"           >> $Cfile
  echo                                                              >> $Cfile
 
- if [ -n "$ParOpt" ]
+ if [ ParOpt ]
  then
     echo "$Str1"                                                   >> $Cfile
     echo "include SUBST_MPI        ./mpif.h;"                      >> $Cfile
@@ -544,7 +534,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  text="stenex or se_noop"
  echo "// options are" $text                                       >> $Cfile
  echo "Module ${ModStenex};"                                       >> $Cfile
- if [ -n "$ParOpt" ]
+ if [ ParOpt ]
  then
     text="// parallel executable; stenex and pario included"
     echo $text                                                     >> $Cfile
@@ -557,22 +547,18 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 
  text="par, par_nodistr and par_noop"
  echo "// options are" $text                                       >> $Cfile
- if [ -n "$ParOpt" ]
+ if [ ParOpt ]
  then
     echo "Module ${ModPar};"                                       >> $Cfile
  fi
  echo                                                              >> $Cfile
 
-# if [ -n "$build_twoway" ]
+# if [ build_twoway ]
 # then
 #    echo "// option set for WRF-CMAQ twoway"                       >> $Cfile
 #    echo "Module ${ModTwoway};"                                    >> $Cfile
 #    echo                                                           >> $Cfile
 # fi
-
- echo "// option set for MPAS-CMAQ coupled model"                  >> $Cfile
- echo "Module ${Modmpascmaq};"                                     >> $Cfile
- echo                                                              >> $Cfile
 
  text="driver"
  echo "// options are" $text                                       >> $Cfile
@@ -634,11 +620,6 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  echo "Module ${ModMegBiog};"                                         >> $Cfile
  echo                                                              >> $Cfile
 
-text="mio"
- echo "// options are" $text                                       >> $Cfile
- echo "Module ${ModMio};"                                         >> $Cfile
- echo                                                              >> $Cfile
-
  text="smoke"
  echo "// options are" $text                                       >> $Cfile
  echo "Module ${ModPlmrs};"                                        >> $Cfile
@@ -680,7 +661,7 @@ text="mio"
  echo "Module ${ModTrac};"                                         >> $Cfile
  echo
 
-# if [ -n "$potvortO3" ]
+# if [ potvortO3 ]
 # then
 #    text="use potential vorticity free-troposphere O3 scaling"
 #    echo "// options are" $text                                    >> $Cfile
@@ -736,7 +717,7 @@ text="mio"
  echo "Module cio;"                                                >> $Cfile
  echo                                                              >> $Cfile
 
- if [ -n "$ModMisc" ]
+ if [ ModMisc ]
  then
     echo "Module ${ModMisc};"                                      >> $Cfile
     echo                                                           >> $Cfile
@@ -763,7 +744,7 @@ text="mio"
  cd $Bld
 
 #> Set multiprocessor/serial options for BLDMAKE execution
- if [ -n "$ParOpt" ]
+ if [ ParOpt ]
  then
     Blder="$BLDER -verbose"
  else
@@ -774,12 +755,12 @@ text="mio"
 
 #> Run BLDMAKE Utility
  bld_flags=""
- if [ -n "$MakeFileOnly" ]
+ if [ MakeFileOnly ]
  then   # Do not compile the Model
     bld_flags="${bld_flags} -makefo"
  fi
 
- if [ -n "$CopySrc" ]
+ if [ CopySrc ]
  then
     bld_flags="${bld_flags}"
  elif [ CopySrcTree ]
@@ -791,26 +772,20 @@ text="mio"
                                               # $Cfile = ${CFG}.bld
  fi
 
- if [ -n "$Debug_CCTM" ]
+ if [ Debug_CCTM ]
  then
     bld_flags="${bld_flags} -debug_cctm"
  fi
 
-# if [ -n "$ISAM_CCTM" ]
+# if [ ISAM_CCTM ]
 # then
 #    bld_flags="${bld_flags} -isam_cctm"
 # fi
 
-# if [ -n "$build_twoway" ]
+# if [ build_twoway ]
 # then
 #   bld_flags="${bld_flags} -twoway"
 # fi
-
-if [ -n "$build_mpas_cmaq" ]
-then
-  bld_flags="${bld_flags} -mpascmaq "
-  ln -s Makefile.mpas_cmaq Makefile
-fi
 
    echo "START Blder ___***____ $Blder $bld_flags $Cfile"
 #> Run BLDMAKE with source code in build directory
@@ -828,11 +803,11 @@ fi
 
 #> Alert user of error in BLDMAKE if it ocurred
    echo "ALERT Makefile"
- if [ "$status" -ne 0 ]
+ if [ $status != 0 ]
  then
     echo "   *** failure in $Blder ***"
     exit 1
- fi
+ endif
 
 #> Preserve old Config file, if it exists, before moving new one to
 #> build directory.
@@ -841,7 +816,7 @@ fi
  then
     echo "   >>> previous ${CFG} exists, re-naming to ${CFG}.old <<<"
     mv $Bld/${CFG} $Bld/${CFG}.old
- fi
+ endif
  mv ${CFG}.bld $Bld/${CFG}
 
 ##> If Building WRF-CMAQ, download WRF, download auxillary files and build
@@ -893,4 +868,3 @@ fi
 
 
 ###exit
-
