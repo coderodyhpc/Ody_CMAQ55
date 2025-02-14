@@ -238,7 +238,7 @@ build_mpas_cmaq=True
 ###       echo "*** ParOpt is not set: required for the build_parallel_io option"
 ###       exit 1
 ###    endif
-###    set PIO = ( -Dparallel_io )
+ PIO=( -Dparallel_io )
 ### else
 ###    set PIO = ""
 ### endif
@@ -544,16 +544,17 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
  text="stenex or se_noop"
  echo "// options are" $text                                       >> $Cfile
  echo "Module ${ModStenex};"                                       >> $Cfile
- if [ -n "$ParOpt" ]
- then
-    text="// parallel executable; stenex and pario included"
-    echo $text                                                     >> $Cfile
-    echo "Module ${ModPario};"                                     >> $Cfile
- else
-    text="serial executable; noop stenex"
-    echo $text                                                     >> $Cfile
- fi
+ echo
+# if [ -n "$ParOpt" ]
+# then
+ text="// parallel executable; stenex and pario included"
+ echo $text                                                        >> $Cfile
+ echo "Module ${ModPario};"                                        >> $Cfile
  echo                                                              >> $Cfile
+# else
+#    text="serial executable; noop stenex"
+#    echo $text                                                     >> $Cfile
+# fi
 
  text="par, par_nodistr and par_noop"
  echo "// options are" $text                                       >> $Cfile
