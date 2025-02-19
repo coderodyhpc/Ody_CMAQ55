@@ -65,7 +65,7 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
 #build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
                                        #>   comment out for off-line chemistry
 #> Two-way MPAS-CMAQ
-Build_mpas_cmaq=True
+build_mpas_cmaq=True
 #> Potential vorticity free-troposphere O3 scaling
 #potvortO3=True
 
@@ -153,10 +153,10 @@ Build_mpas_cmaq=True
  echo " "
  echo "End SCIENCE MODULE"
  echo " "
-#============================================================================================
+#==================================================================================
 #> Computing System Configuration:
 #>    Most of these settings are done in config.cmaq
-#============================================================================================
+#==================================================================================
 
  export FC=${myFC}                     #> path of Fortan compiler; set in config.cmaq
  FP=$FC                       #> path of Fortan preprocessor; set in config.cmaq
@@ -184,9 +184,9 @@ Build_mpas_cmaq=True
  echo "End COMPUTING SYSTEM CONF"
  echo " "
 
-#============================================================================================
+#==================================================================================
 #> Implement User Input
-#============================================================================================
+#==================================================================================
 
 #> Check for CMAQ_REPO and CMAQ_LIB settings:
  if [ ! -e $CMAQ_REPO ] && [ ! -e $CMAQ_LIB ]
