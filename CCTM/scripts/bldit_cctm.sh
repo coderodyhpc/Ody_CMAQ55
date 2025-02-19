@@ -304,13 +304,13 @@ fi
 
 echo "End Multiprocessing"
 #> if DDM-3D is set, add the pre-processor flag for it.
- if [ DDM3D_CCTM ]
- then
-    SENS=( -Dsens )
- else
-    SENS=""
- fi
-echo "SENS $SENS"
+# if [ DDM3D_CCTM ]
+# then
+#    SENS=( -Dsens )
+# else
+#    SENS=""
+# fi
+#echo "SENS $SENS"
 
 #> Build Mechanism Files and instruct build-make to look
 #> in the CHEMMECH output folder for the files
