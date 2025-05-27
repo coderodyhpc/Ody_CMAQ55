@@ -248,62 +248,29 @@ build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
  fi
 
 #> Set variables needed for multiprocessor and serial builds
- if [ ParOpt ]
- then
-    #Multiprocessor system configuration
-    echo "   Parallel; set MPI flags"
-    ModStenex=STENEX/se
-    ModPario=PARIO
-    ModPar=par/mpi
-    PARIO=${CMAQ_MODEL}/PARIO
-    STENEX=${CMAQ_MODEL}/STENEX
-    echo " ModStenex $ModStenex "
-    echo " ModPario $ModPario "
-    echo " ModPar $ModPar "
-    echo " PARIO $PARIO "
-    echo " STENEX $STENEX "
-    # MPI_INC is set in config.cmaq
-    # PIO_INC="${IOAPI_DIR}/src/fixed_src"
-    PAR=( -Dparallel )
-    Popt=SE
-    seL=se_snl
-    LIB2="${ioapi_lib}"
-    LIB3="${mpi_lib} ${extra_lib}"
-    echo " LIB2 $LIB2 "
-    echo " LIB3 $LIB3 "
-    Str1=("// Parallel / Include message passing definitions")
-    Str2=("include SUBST_MPI mpif.h;")
-    # Distribute Environment to different machines if not done automatically
-    # This is new but I'm ignoring it for the time being
-#    if ( $?DistrEnv ) then
-#      set PAR = ($PAR -Dcluster)
-#    endif
- else
-    #Serial system configuration
-    echo "   Not Parallel; set Serial (no-op) flags"
-    ModStenex=STENEX/noop
-    ModPar=par/par_noop
-    PARIO="."
-    STENEX=${CMAQ_MODEL}/STENEX/noop
-    MPI_INC="."
-    # PIO_INC = "."
-    PAR=""
-    Popt=NOOP
-    seL=sef90_noop
-    LIB2="${ioapi_lib} ${extra_lib}"
-    Str1 =
-    Str2 =
- fi
-
-echo "End Multiprocessing"
-#> if DDM-3D is set, add the pre-processor flag for it.
- if [ DDM3D_CCTM ]
- then
-    SENS=( -Dsens )
- else
-    SENS=""
- fi
-echo "SENS $SENS"
+#Multiprocessor system configuration
+ echo "   Parallel; set MPI flags"
+ ModStenex=STENEX/se
+ ModPario=PARIO
+ ModPar=par/mpi
+ PARIO=${CMAQ_MODEL}/PARIO
+ STENEX=${CMAQ_MODEL}/STENEX
+ echo " ModStenex $ModStenex "
+ echo " ModPario $ModPario "
+ echo " ModPar $ModPar "
+ echo " PARIO $PARIO "
+ echo " STENEX $STENEX "
+ # MPI_INC is set in config.cmaq
+ # PIO_INC="${IOAPI_DIR}/src/fixed_src"
+ PAR=( -Dparallel )
+ Popt=SE
+ seL=se_snl
+ LIB2="${ioapi_lib}"
+ LIB3="${mpi_lib} ${extra_lib}"
+ echo " LIB2 $LIB2 "
+ echo " LIB3 $LIB3 "
+ Str1=("// Parallel / Include message passing definitions")
+ Str2=("include SUBST_MPI mpif.h;")
 
 #> Build Mechanism Files and instruct build-make to look
 #> in the CHEMMECH output folder for the files
@@ -788,7 +755,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 
 # if [ build_twoway ]
 # then
-#   bld_flags="${bld_flags} -twoway"
+ bld_flags="${bld_flags} -twoway"
 # fi
 
    echo "START Blder ___***____ $Blder $bld_flags $Cfile"
@@ -797,7 +764,7 @@ Cfile=${Bld}/${CFG}.bld      # Config Filename
 
 #> Rename Makefile to specify compiler option and link back to Makefile
 #! This needs editing for two-way
-   echo "START Makefile"
+ echo "START Makefile"
  mv Makefile Makefile.$compilerString
  if [ -e Makefile.$compilerString ] && [ -e Makefile ]
  then
