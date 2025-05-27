@@ -27,11 +27,7 @@
       Call git_export( status )
 
 ! create Makefile
-      if (twoway) then
-         Open ( unit=lfn, file='Makefile.twoway', iostat=status )
-      else
-         Open ( unit=lfn, file='Makefile', iostat=status )
-      end if
+      Open ( unit=lfn, file='Makefile.twoway', iostat=status )
       If ( status .ne. 0 ) Call error_msg( 'Cannot create FILE [Makefile]' )
 
       Call makefile( lfn, cfgFile )
@@ -83,7 +79,7 @@
       isam_cctm = .False.
       checkout  = .False.
       makefo    = .False.
-      twoway    = .False.
+      twoway    = .True.
       git_local = .False.
       repo      = ' '
       reporoot  = ' '
@@ -135,17 +131,7 @@
           makefo = .True.; Cycle
         End If
 
-        If ( argv .Eq. '-SERIAL' ) Then     ! compile for serial execution
-          serial = .True.; Cycle
-        End If
-
-        If ( argv .Eq. '-TWOWAY' ) Then     ! WRF-CMAQ twoway CCTM
-           If ( .Not. serial ) Then
-              twoway = .True.; Cycle
-           Else
-              stop ' TwoWay not available for Serial execution'
-           End If
-        End If
+        twoway = .True.; Cycle
 
         If ( argv .Eq. '-GIT_LOCAL' ) Then  ! do not copy source files to BLD directory
           git_local = .True.; Cycle
@@ -157,10 +143,6 @@
 
         If ( argv .Eq. '-DEBUG_CCTM' ) Then
           debug_cctm = .True.; Cycle
-        End If
-
-        If ( argv .Eq. '-ISAM_CCTM' ) Then
-          isam_cctm = .True.; Cycle
         End If
 
         If ( argv .Eq. '-VERBOSE' ) Then
@@ -284,29 +266,6 @@
 
       Call writeCPP( lfn )
 
-      if ( .not. twoway) then
-         If ( verbose ) Then
-           Write( *, '("  CPP Flags defined")' )
-         End If
-
-         Write( lfn, '(/" IOAPI  = -L$(LIB)/",a,1x,a)' ) Trim( lib_4 ), Trim( ioapi )
-         Write( lfn, '( " NETCDF = -L$(LIB)/",a,1x,a, " -L$(LIB)/",a,1x,a)' ) 
-     &     ,"netcdff/lib", Trim( netcdff ), "netcdf/lib", Trim(netcdf)
-      
-         If ( serial ) Then
-            Write( lfn, '( " LIBRARIES = $(IOAPI) $(NETCDF)")' )
-         Else
-!            Write( lfn, '( " MPICH  = -L$(LIB)/",a,1x,a)' ) "mpich/lib", Trim( mpich )
-            Write( lfn, '( " MPICH  = -L$(LIB)/",a,1x,a)' ) "mpi/lib", Trim( mpich )
-            Write( lfn, '( " LIBRARIES = $(IOAPI) $(NETCDF) $(MPICH)")' )
-         End If
-
-!        Call writeLIB( lfn )
-         If ( verbose ) Then
-           Write( *, '("  Libraries defined")' )
-         End If
-      end if
-
       Call writeINC( lfn )
       If ( verbose ) Then
         Write( *, '("  Includes defined")' )
@@ -391,10 +350,6 @@
       Integer n
       Character( EXT_LEN ) :: field
 
-      if (.not. twoway) then
-         Write( lfn, '(/" CPP = "a)' ) Trim( cpp )
-      end if
-
       nfields = getFieldCount( cpp_flags, ' ' )
 
       If ( nfields .Le. 1 ) Then
@@ -403,9 +358,7 @@
 
         Write( lfn, '(" cpp_flags =",$)')
 
-        if (twoway) then
-           Write( lfn, '(1x,a,/,2x,a,$)' ) backslash, '-Dtwoway'
-        end if
+        Write( lfn, '(1x,a,/,2x,a,$)' ) backslash, '-Dtwoway'
 
         ! print each field at a time
         Do n = 1, nfields
@@ -414,12 +367,6 @@
         End Do
         Write( lfn, '(1x)' )
 
-      End If
-
-      If( isam_cctm )Then
-         Write( lfn, '(/" ifndef isam")')
-         Write( lfn, '( "   isam = true")')
-         Write( lfn, '( " endif")')
       End If
 
       Write( lfn, '(/" ifneq (,$(filter $(isam), TRUE true True T ))")')
@@ -563,76 +510,37 @@
       pathStr = ' '
       hasPaths = .False.
 
-      If ( twoway ) Then
-        n_M = n_Mac - 1
+      n_M = n_Mac - 1
 
 ! find path strings
-        Do n = 1, n_includes
-          Do i = 1, n_M
-            If ( include( n )%name .Eq. pathChk( i ) ) Then
-              path = include( n )%path
-              If ( pathInd( i ) .Gt. 1 ) Then
-                adjustment = 1
-              Else
-                adjustment = 0
-              End If
-              Do j = 1, pathInd( i ) - adjustment
-                pos = Index( path, '/', .True.)
-                If ( pos .Le. 0 ) Exit
-                path = path( 1:pos-1 )
-              End Do
-              pathStr( i ) = path
-              hasPaths = .True.
+      Do n = 1, n_includes
+        Do i = 1, n_M
+          If ( include( n )%name .Eq. pathChk( i ) ) Then
+            path = include( n )%path
+            If ( pathInd( i ) .Gt. 1 ) Then
+              adjustment = 1
+            Else
+              adjustment = 0
             End If
-          End Do   ! n_Mac loop
-        End Do   ! n_includes loop
-
-        If ( hasPaths ) Then
-          Write( lfn, '(1x)' )
-          Do i = 1, n_Mac
-            If ( pathStr( i ) .Ne. ' ' ) Then
-!             Write( lfn, '(a," = ",a)' ) Trim( pathMacro( i ) ), '.'
-              Write( lfn, '(a," = ",a)' ) pathMacro( i ), '.'
-            End If
-          End Do
-        End If
-
-      Else
-        If ( serial ) Then
-           n_M = n_Mac - 1
-        Else
-           n_M = n_Mac
-        End If
-
-! find path strings
-        Do n = 1, n_includes
-          Do i = 1, n_M
-  !       write( *,* ) "%name, chk: ", n, i, trim( include( n )%name ), ' ', trim( pathChk( i ) )
-            If ( include( n )%name .Eq. pathChk( i ) ) Then
-              path = include( n )%path
-              pos = Index( path, '/', .True.) ! find char index of last "/" in "path"
-  !           write( *,* ) " path, pos: ", n, i, trim( path ), pos
+            Do j = 1, pathInd( i ) - adjustment
+              pos = Index( path, '/', .True.)
               If ( pos .Le. 0 ) Exit
               path = path( 1:pos-1 )
-              pathStr( i ) = path
-              hasPaths = .True.
-            End If
-          End Do  ! n_Mac loop
-        End Do  ! n_includes loop
+            End Do
+            pathStr( i ) = path
+            hasPaths = .True.
+          End If
+        End Do   ! n_Mac loop
+      End Do   ! n_includes loop
 
-        If ( hasPaths ) Then
-          Write( lfn, '(1x)' )
-          Do i = 1, n_M
-            If ( pathStr( i ) .Ne. ' ' ) Then
-              If ( pathMacro( i ) .EQ. "MPI_INC " ) Then
-                  Write( lfn, '(1x,a," = ",a)' ) pathMacro( i ), "$(LIB)/mpi/include"
-              Else
-                  Write( lfn, '(1x,a," = ",a)' ) pathMacro( i ), Trim( pathStr( i ) )
-              End If
-            End If
-          End Do
-        End If
-
+      If ( hasPaths ) Then
+        Write( lfn, '(1x)' )
+        Do i = 1, n_Mac
+          If ( pathStr( i ) .Ne. ' ' ) Then
+!             Write( lfn, '(a," = ",a)' ) Trim( pathMacro( i ) ), '.'
+            Write( lfn, '(a," = ",a)' ) pathMacro( i ), '.'
+          End If
+        End Do
       End If
 
 ! write include lines
@@ -659,20 +567,15 @@
           If ( pos .Gt. 0 .And. pathStr( i ) .Ne. ' ' ) Then
             pos2 = pos + Len_Trim( pathStr( i ) )
             If ( pos .Eq. 1 ) Then
-              if (twoway .and. (pathMacro(Map) == 'MPI_INC')) then
+              if (pathMacro(Map) == 'MPI_INC') then
                  path = path( 3: )
               else
                  path = '$(' // Trim( pathMacro( Map ) ) // ')' // path( pos2: )
               end if
               Exit
             Else
-              If ( twoway ) Then
-                path = path( 1:pos-1 ) // '$('
-     &                                 // Trim( pathMacro( i ) ) // ')'
-              Else
-                path = path( 1:pos-1 ) // '$('
-     &                               // Trim( pathMacro( Map ) ) // ')' // path( pos2: )
-              End If
+              path = path( 1:pos-1 ) // '$('
+     &                               // Trim( pathMacro( i ) ) // ')'
             End If
           End If
         End Do
@@ -734,7 +637,7 @@
         Do i = 1, nfiles
           pos = Index( filename(i), '.' )
           If ( pos .Le. 0 ) Cycle
-          if (twoway .and. filename(i)(1:21) == 'complex_number_module') then
+          if (filename(i)(1:21) == 'complex_number_module') then
              obj = ''
           else
              obj = filename(i)(1:pos) // 'o'
@@ -951,14 +854,12 @@
       Character( FLD_LEN ) :: record
       Character( 1 )       :: tab = char( 9 )
 
-      if (twoway) then
-         Write( lfn, *)
-         Write( lfn, *) 'LIBTARGET    = cmaq'
-         Write( lfn, *) 'TARGETDIR    = ./'
-         Write( lfn, *) '$(LIBTARGET) : $(OBJS)'
-         Write( lfn, '(a,a, "$(AR) $(ARFLAGS) ../main/libcmaqlib.a $(OBJS)"/)' ) tab, tab
-         Write( lfn, *) 'include ../configure.wrf'
-      end if
+      Write( lfn, *)
+      Write( lfn, *) 'LIBTARGET    = cmaq'
+      Write( lfn, *) 'TARGETDIR    = ./'
+      Write( lfn, *) '$(LIBTARGET) : $(OBJS)'
+      Write( lfn, '(a,a, "$(AR) $(ARFLAGS) ../main/libcmaqlib.a $(OBJS)"/)' ) tab, tab
+      Write( lfn, *) 'include ../configure.wrf'
 
 ! build SUFFIXES record
       record = '.SUFFIXES:'
@@ -968,11 +869,6 @@
       End Do
 
       Write( lfn, '(/,a)') Trim( record )
-
-      if (.not. twoway) then
-         Write( lfn, '(/"$(EXEC): $(OBJS)")' )
-         Write( lfn, '(a,"$(LINKER) $(LINK_FLAGS) $(OBJS) $(LIBRARIES) -o $@"/)' ) tab
-      end if
 
       Write( lfn, '(".F.o:")' )
       Write( lfn, '(a,"$(FC) -c $(F_FLAGS) $(CPP_FLAGS) $(INCLUDES) $<"/)' ) tab
