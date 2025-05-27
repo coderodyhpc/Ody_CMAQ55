@@ -1,49 +1,3 @@
-!-----------------------------------------------------------------------!
-!  The Community Multiscale Air Quality (CMAQ) system software is in    !
-!  continuous development by various groups and is based on information !
-!  from these groups: Federal Government employees, contractors working !
-!  within a United States Government contract, and non-Federal sources  !
-!  including research institutions.  These groups give the Government   !
-!  permission to use, prepare derivative works of, and distribute copies!
-!  of their work in the CMAQ system to the public and to permit others  !
-!  to Do so.  The United States Environmental Protection Agency         !
-!  therefore grants similar permission to use the CMAQ system software, !
-!  but users are requested to provide copies of derivative works or     !
-!  products designed to operate in the CMAQ system to the United States !
-!  Government without restrictions as to use by others.  Software       !
-!  that is used with the CMAQ system but distributed under the GNU      !
-!  General Public License or the GNU Lesser General Public License is   !
-!  subject to their copyright restrictions.                             !
-!-----------------------------------------------------------------------!
-
-!-------------------------------------------------------------------------------
-!     PROGRAM bldmake
-!     Generate a Makefile for source files extracted from a git repository
-!     originally written in C by Steve Thorpe
-!     rewritten in Fortran by Steve Howard (for a CVS repository)
-!     redone to meet CMAQ coding standards by Jeff Young (Nov 2012)
-!     Sep 2013 J.Young: Increased local variables "modName" and "modFile" name
-!                       lengths from 32 to 64 chars
-!     Dec 2013 D.Wong: Expanded functionality to handle twoway model
-!     Sep 2014 D.Wong: Setup . as the path that contains *.EXT files
-!     Aug 2015 D.Wong: Modified subroutine writeOBJS to put STENEX and PARIO
-!                      in front of GLOBAL_MODULES in the OBJS sequence. In
-!                      this arrangement, all routines in STENEX will stay under
-!                      STENEX and all routines in PARIO will stay under PARIO
-!                      rather than GLOBAL_MODULES
-!     Oct 2015 J.Young: Rework to make macros in the makefile for libs and
-!                       compiler "I" references; get rid of the CVS option.
-!     Jan 2016 D.Wong: Fixed the include path of mpif.h
-!     June 2019 F. Sidi: Removed redundant IOAPI library. Makefile generated 
-!                        consistant with IOAPI library format.
-!     July 2019 F. Sidi: Added netCDF Fortran Library Path. Makefile generated 
-!                        consistent with netCDF library format. 
-!     Nov 2020 D. Wong: moified the code to build Makefile.twoay automatically
-!                       when build_twoway is turned on
-!     jan 2020 D. Wong: indlucded a help message for option -twoway
-!     June 2021 F. Sidi: Restore reading of MPICH string from cfg for mpi libraries 
-!-------------------------------------------------------------------------------
-
       Program bldmake
 
       Use ModelCFG
@@ -298,152 +252,35 @@
       End If
 
 ! print header lines
-      if ( twoway) then
-         write( lfn, *) 'IOAPI_PATH = $(IOAPI)/$(LIOAPI)'
-         write( lfn, *) 'IOAPI_INC_PATH = $(IOAPI)/ioapi/fixed_src'
-         write( lfn, *)
-         if ( Index( f_flags, '-Mfixed') > 0) then
-            write( lfn, *) 'EXTEND_FLAG = -Mextend'
-         else if ( Index( f_flags, '-ffixed-form') > 0) then
-            write( lfn, *) 'EXTEND_FLAG = -ffixed-line-length-132'
-         else if ( Index( f_flags, '-fixed') > 0) then
-            write( lfn, *) 'EXTEND_FLAG = -132'
-         end if
-         write( lfn, *)
-         write( lfn, *) 'WRF_MODULE = -I ../frame \'
-         write( lfn, *) '             -I ../share \'
-         write( lfn, *) '             -I ../phys  \'
-         write( lfn, *) '             -I ../main  \'
-         write( lfn, *) '             -I ../dyn_em  \'
-         write( lfn, *) '             -I ../external/esmf_time_f90'
-         write( lfn, *)
-         write( lfn, *) '#   Compiler flags'
-         write( lfn, *) 'f_FLAGS    = $(FORMAT_FIXED) $(EXTEND_FLAG) \'
-         write( lfn, *) '             $(FCOPTIM) -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
-         write( lfn, *) 'F_FLAGS    = $(FORMAT_FIXED) $(EXTEND_FLAG) \'
-         write( lfn, *) '             $(FCOPTIM) -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
-         write( lfn, *) 'F90_FLAGS  = -c $(FORMAT_FREE) $(FCOPTIM) \'
-         write( lfn, *) '             -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
-         write( lfn, *) 'f90_FLAGS  = -c $(FORMAT_FREE) $(FCOPTIM) \'
-         write( lfn, *) '             -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
-         write( lfn, *) 'C_FLAGS    = -O2  -DFLDMN -I /usr/include'
-         write( lfn, *)
-      else
-         If ( serial ) Then
-            Write( lfn, '("#   Makefile generated for serial execution using program bldmake")' )
-         Else
-            Write( lfn, '("#   Makefile generated for parallel execution using program bldmake")' )
-         End If
-         Write( lfn, '("#")' )
-         Write( lfn, '("#   Generation date [",a,"]")' )      Trim( currentDate )
-         Write( lfn, '("#   Configuration file [",a,"]")' )   Trim( cfgFile )
-         Write( lfn, '("#   Using GIT repository [",a,"]")' ) Trim( repo )
-         If ( Trim( mechanism ) .Ne. 'X' )
-     &      Write( lfn, '("#   With mechanism [",a,"]")' )    Trim( mechanism )
-
-         ! Document Explicit Compiler Execution Paths if not given explicitly
-         If( Trim( f_compiler ) .Ne. Trim( f_compiler_path ) 
-     &        .Or.  Trim( c_compiler ) .Ne. Trim( c_compiler_path ) )Then
-            Write( lfn, '("#   Full Compiler Paths when Makefile was Built:")' ) 
-            Write( lfn, '("#       FC = ",a)' ) Trim( f_compiler_path )
-            Write( lfn, '("#       CC = ",a)' ) Trim( c_compiler_path )
-         End If 
-
-         ! Document Explicit Library Paths
-         Call GETENV( 'IOAPI_INCL_DIR', ioapi_incl_dir )
-         Call GETENV( 'IOAPI_LIB_DIR',  ioapi_lib_dir )
-         Call GETENV( 'NETCDF_LIB_DIR', netcdf_lib_dir )
-         Call GETENV( 'NETCDFF_LIB_DIR', netcdff_lib_dir )
-         Call GETENV( 'MPI_LIB_DIR',    mpi_lib_dir )
-         Write( lfn, '("#   Library Paths:")' ) 
-         Write( lfn, '("#      $(LIB)/ioapi/include_files -> ",a)' ) Trim( ioapi_incl_dir )
-         Write( lfn, '("#      $(LIB)/ioapi/lib -> ",a)' ) Trim( ioapi_lib_dir )
-         Write( lfn, '("#      $(LIB)/mpi -> ",a)' ) Trim( mpi_lib_dir )
-         Write( lfn, '("#      $(LIB)/netcdf -> ",a)' ) Trim( netcdf_lib_dir )
-         Write( lfn, '("#      $(LIB)/netcdff -> ",a)' ) Trim( netcdff_lib_dir )
-         Write( lfn, '("#",/,"#   Command-Line Options:      ")' ) 
-      
-         If( debug_cctm )Then
-            Write( lfn, '("#      DEBUG = FALSE or false -- turn off debug flags ")' )
-            Write( lfn, '("#  OR  debug = false or FALSE -- turn off debug flags ")' )
-            Write( lfn, '("#  Can set either variable by using the setenv command to")' )
-            Write( lfn, '("#  turn off debugging session with multiple compilations")' )
-         Else
-            Write( lfn, '("#      DEBUG = TRUE or true -- turn on debug flags ")' ) 
-            Write( lfn, '("#  OR  debug = true or TRUE -- turn on debug flags ")' ) 
-            Write( lfn, '("#  Can set either variable by using the setenv command for")' ) 
-            Write( lfn, '("#  a debugging session with multiple compilations")' ) 
-         End if
-         Write( lfn, '("#")' ) 
-         Write( lfn, '("#------------------------------------------------- ")' ) 
-
-         ! Begin Makefile Commands
-         Write( lfn, '(/" EXEC = ",a)' ) Trim( model )
-
-         Write( lfn, '(/" FC = ",a)' ) Trim( f_compiler )
-         Write( lfn, '( " CC = ",a)' ) Trim( c_compiler )
-
-         Write( lfn, '(/" LIB = ",a)' ) Trim( lib_base )
-         Write( lfn, '( " include_path = -I $(LIB)/",a,1x,a)' ) Trim( lib_1 ), backslash 
-         If ( l_lib_5) Then
-            Write( lfn, '( "                -I $(LIB)/",a,1x,a)' ) Trim( lib_2 ), backslash 
-            Write( lfn, '( "                -I $(LIB)/",a,1x,a)' ) Trim( lib_3 ), backslash
-            Write( lfn, '( "                -I $(LIB)/",a)' )      Trim( lib_5 )
-         Else if ( l_lib_3 ) Then
-            Write( lfn, '( "                -I $(LIB)/",a,1x,a)' ) Trim( lib_2 ), backslash 
-            Write( lfn, '( "                -I $(LIB)/",a)' )      Trim( lib_3 )
-         Else
-            Write( lfn, '( "                -I $(LIB)/",a,1x,a)' ) Trim( lib_2 )
-         End If
-
-         Write( lfn, '(/" WARN = ")' )
-         Write( lfn, '( " FSTD = ",a)' ) Trim( fstd )
-         Write( lfn, '( " DBG  = ",a)' ) Trim( dbg )
-
-         If( debug_cctm )Then
-            Write( lfn, '(/" ifndef debug")')
-            Write( lfn, '( "   debug = true")')
-            Write( lfn, '( " endif")')
-         End If
-
-         Write( lfn, '(/" ifneq (,$(filter $(debug), TRUE true True T ))")')
-         Write( lfn, '( "     DEBUG = TRUE")' )
-         Write( lfn, '( " endif")' )
-         
-         Write( lfn, '(/" ifneq (,$(filter $(DEBUG), TRUE true ))")')
-         Write( lfn, '( "     f_FLAGS   = ",a)' ) Trim( f_flags ) // " $(DBG) $(include_path)"
-         Write( lfn, '( "     f90_FLAGS = ",a)' ) Trim( f90_flags ) // " $(DBG) $(include_path)"
-
-         Write( lfn, '( " else")' )
-         Write( lfn, '( "     f_FLAGS   = ",a)' ) Trim( f_flags ) // " $(FSTD) $(include_path)"
-         Write( lfn, '( "     f90_FLAGS = ",a)' ) Trim( f90_flags ) // " $(FSTD) $(include_path)"
-
-         Write( lfn, '( " endif")' )
-
-         Write( lfn, '(/" F_FLAGS   = $(f_FLAGS)")' )
-         Write( lfn, '( " F90_FLAGS = $(f90_FLAGS)")' )
-
-         If ( serial ) Then
-            Write( lfn, '( " C_FLAGS   = ",a)' ) Trim( c_flags ) // "-I."
-         Else
-            Write( lfn, '( " C_FLAGS   = ",a)' ) Trim( c_flags ) // "$(LIB)/mpi/include -I."
-         End If
-
-         If ( verbose ) Then
-           Write( *, '("  Compilers defined")' )
-         End If
-
-         Write( lfn, '(/" LINKER     = ",a)' ) Trim( linker )
-         Write( lfn, '( " LINK_FLAGS = ",a)' ) Trim( link_flags )
-
-         If ( Len_Trim( reporoot ) .Gt. 0 ) Then
-           Write( lfn, '(/" REPOROOT = ",a)' ) Trim( reporoot )
-         End If
-
-         If ( Len_Trim( VPATH ) .Gt. 0 ) Then
-           Call writeVPATH( lfn )
-         End If
+      write( lfn, *) 'IOAPI_PATH = $(IOAPI)/$(LIOAPI)'
+      write( lfn, *) 'IOAPI_INC_PATH = $(IOAPI)/ioapi/fixed_src'
+      write( lfn, *)
+      if ( Index( f_flags, '-Mfixed') > 0) then
+         write( lfn, *) 'EXTEND_FLAG = -Mextend'
+      else if ( Index( f_flags, '-ffixed-form') > 0) then
+         write( lfn, *) 'EXTEND_FLAG = -ffixed-line-length-132'
+      else if ( Index( f_flags, '-fixed') > 0) then
+         write( lfn, *) 'EXTEND_FLAG = -132'
       end if
+      write( lfn, *)
+      write( lfn, *) 'WRF_MODULE = -I ../frame \'
+      write( lfn, *) '             -I ../share \'
+      write( lfn, *) '             -I ../phys  \'
+      write( lfn, *) '             -I ../main  \'
+      write( lfn, *) '             -I ../dyn_em  \'
+      write( lfn, *) '             -I ../external/esmf_time_f90'
+      write( lfn, *)
+      write( lfn, *) '#   Compiler flags'
+      write( lfn, *) 'f_FLAGS    = $(FORMAT_FIXED) $(EXTEND_FLAG) \'
+      write( lfn, *) '             $(FCOPTIM) -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
+      write( lfn, *) 'F_FLAGS    = $(FORMAT_FIXED) $(EXTEND_FLAG) \'
+      write( lfn, *) '             $(FCOPTIM) -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
+      write( lfn, *) 'F90_FLAGS  = -c $(FORMAT_FREE) $(FCOPTIM) \'
+      write( lfn, *) '             -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
+      write( lfn, *) 'f90_FLAGS  = -c $(FORMAT_FREE) $(FCOPTIM) \'
+      write( lfn, *) '             -I $(IOAPI_PATH) -I $(IOAPI_INC_PATH) $(WRF_MODULE) -I.'
+      write( lfn, *) 'C_FLAGS    = -O2  -DFLDMN -I /usr/include'
+      write( lfn, *)
 
       Call writeCPP( lfn )
 
