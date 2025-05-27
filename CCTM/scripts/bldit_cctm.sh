@@ -5,7 +5,7 @@
  echo "Compiler is set to $compiler"
 
 #> Source the config.cmaq file to set the build environment
- cd ../..
+ cd /home/ubuntu/WRF-CMAQ
  source ./config_wrfcmaq.sh
 
  set echo
