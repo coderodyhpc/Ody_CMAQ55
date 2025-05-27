@@ -1,12 +1,12 @@
 #!/bin/bash
 #> Set Compiler Identity by User Input: Options -> intel | pgi | gcc
  export compiler=gcc
- export Vrsn=14.2
+ export Vrsn=13.3
  echo "Compiler is set to $compiler"
 
 #> Source the config.cmaq file to set the build environment
  cd ../..
- source ./config_cmaq.sh
+ source ./config_wrfcmaq.sh
 
  set echo
 
@@ -62,8 +62,8 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
 #DDM3D_CCTM=True                       #> uncomment to compile CCTM with DD3D activated
                                        #>   comment out to use standard process
 #> Two-way WRF-CMAQ
-#build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
-                                       #>   comment out for off-line chemistry
+build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
+                                      #>   comment out for off-line chemistry
 
 #> Potential vorticity free-troposphere O3 scaling
 #potvortO3=True
@@ -82,9 +82,9 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
  EXEC=CCTM_${VRSN}.exe          #> executable name
  CFG=CCTM_${VRSN}.cfg          #> configuration file name
  echo "EXEC equals $EXEC $CFG"
-# if [ $build_twoway == "True" ]; then            # WRF Version used for WRF-CMAQ Model (must be v4.4+)
-#    WRF_VRSN=v4.4
-# fi
+ if [ $build_twoway == "True" ]; then            # WRF Version used for WRF-CMAQ Model (must be v4.4+)
+    WRF_VRSN=v4.6
+ fi
 
 #========================================================================
 #> CCTM Science Modules
@@ -215,6 +215,10 @@ ParOpt=true             #> uncomment to build a multiple processor (MPI) executa
 
 #> If the two-way, coupled WRF-CMAQ model is being built,
 #> then just generate the Makefile. Don't compile.
+ if [ $build_twoway == "True" ]; then            # WRF Version used for WRF-CMAQ Model (must be v4.4+)
+    MakeFileOnly=True
+    ModTwoway=twoway
+ fi
 # if [ build_twoway ]
 # then
 #    MakeFileOnly=true
@@ -351,7 +355,7 @@ echo "SENS $SENS"
 
 #> Set and create the "BLD" directory for checking out and compiling
 #> source code. Move current directory to that build directory.
- Bld=$CMAQ_HOME/CCTM/scripts/BLD_CCTM_${VRSN}_${compilerString}_${Mechanism}_${DepMod}
+ Bld=$CMAQ_HOME/CCTM/scripts/BLD_CCTM_${VRSN}_${compilerString}_${Mechanism}_${DepMod}_wrfcmaq
  if [ ! -e "$Bld" ]
  then
     mkdir $Bld
