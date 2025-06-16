@@ -70,8 +70,8 @@
         export myCC=/opt/atrium/openmpi/bin/mpicc
         export myFSTD=""
         export myDBG="-Wall -O0 -g -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace"
-        export myFFLAGS="-ffixed-form -ffixed-line-length-132 -finit-character=32 -O3 -mcpu=neoverse-v2 -fallow-argument-mismatch -fallow-invalid-boz"
-        export myFRFLAGS="-ffree-form -ffree-line-length-none -finit-character=32 -O3 -mcpu=neoverse-v2 -fallow-argument-mismatch -fallow-invalid-boz"
+        export myFFLAGS="-ffixed-form -ffixed-line-length-132 -finit-character=32 -O3 -fallow-argument-mismatch -fallow-invalid-boz"
+        export myFRFLAGS="-ffree-form -ffree-line-length-none -finit-character=32 -O3 -fallow-argument-mismatch -fallow-invalid-boz"
         export myCFLAGS="-O2"
 #        export myLINK_FLAG= # "-fopenmp" openMP not supported w/ CMAQ
         export extra_lib=""
