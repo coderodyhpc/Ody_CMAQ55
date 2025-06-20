@@ -5,8 +5,8 @@
  echo "Compiler is set to $compiler"
 
 #> Source the config.cmaq file to set the build environment
- cd /home/ubuntu/WRF-CRACMM
- source ./config_wrfcracmm.sh
+ cd /home/ubuntu/WRF-CRACMMM
+ source ./config_wrfcracmmM.sh
 
  set echo
 
@@ -96,8 +96,8 @@ build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
 
  ModGrid=grid/cartesian            #> grid configuration module
 
-# DepMod=m3dry                      #> m3dry or stage
- DepMod=stage
+ DepMod=m3dry                      #> m3dry or stage
+# DepMod=stage
  ModAdv=wrf_cons                   #> 3-D Advection Scheme [Options: wrf_cons (default), local_cons]
  ModHdiff=hdiff/multiscale         #> horizontal diffusion module
  ModVdiff=vdiff/acm2_${DepMod}     #> vertical diffusion module (see $CMAQ_MODEL/CCTM/src/vdiff)
