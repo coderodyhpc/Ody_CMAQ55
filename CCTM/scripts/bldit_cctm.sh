@@ -5,8 +5,8 @@
  echo "Compiler is set to $compiler"
 
 #> Source the config.cmaq file to set the build environment
- cd /home/ubuntu/WRF-CMAQ
- source ./config_wrfcmaq.sh
+ cd /home/ubuntu/WRF-STAGE
+ source ./config_wrfstage.sh
 
  set echo
 
@@ -83,7 +83,7 @@ build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
  CFG=CCTM_${VRSN}.cfg          #> configuration file name
  echo "EXEC equals $EXEC $CFG"
  if [ $build_twoway == "True" ]; then            # WRF Version used for WRF-CMAQ Model (must be v4.4+)
-    WRF_VRSN=v4.6
+    WRF_VRSN=v4.8
  fi
 
 #========================================================================
@@ -96,8 +96,7 @@ build_twoway=True                     #> uncomment to build WRF-CMAQ twoway;
 
  ModGrid=grid/cartesian            #> grid configuration module
 
- DepMod=m3dry                      #> m3dry or stage
-# DepMod=stage
+ DepMod=stage                      #> m3dry or stage
  ModAdv=wrf_cons                   #> 3-D Advection Scheme [Options: wrf_cons (default), local_cons]
  ModHdiff=hdiff/multiscale         #> horizontal diffusion module
  ModVdiff=vdiff/acm2_${DepMod}     #> vertical diffusion module (see $CMAQ_MODEL/CCTM/src/vdiff)
