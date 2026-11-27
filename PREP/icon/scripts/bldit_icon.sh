@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #> Critical Folder Locations
- export CMAQ_HOME=/home/ubuntu/CMAQ
- export CMAQ_REPO=/home/ubuntu/CMAQ
+ export CMAQ_HOME=/home/ubuntu/CMAQv5
+ export CMAQ_REPO=/home/ubuntu/CMAQv5
 
 #> Set the compiler option
  export compiler=gcc
- export Vrsn=14.2
- export compilerVrsn=14
+ export Vrsn=15.2
+ export compilerVrsn=15
  echo "Compiler is set to $compiler"
 
 
