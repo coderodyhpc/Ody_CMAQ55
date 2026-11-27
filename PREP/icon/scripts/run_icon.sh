@@ -4,14 +4,14 @@
 #> Runtime Environment Options
 # ==================================================================
 
- export CMAQ_HOME=/home/ubuntu/CMAQ
- export CMAQ_REPO=/home/ubuntu/CMAQ
- export CMAQ_DATA=/home/ubuntu/CMAQ/data_custom
+ export CMAQ_HOME=/home/ubuntu/CMAQv5
+ export CMAQ_REPO=/home/ubuntu/CMAQv5
+ export CMAQ_DATA=/home/ubuntu/CMAQv5/data_custom
 
 #> Set the compiler option
  export compiler=gcc
- export Vrsn=14.2
- export compilerString=gcc14
+ export Vrsn=15.2
+ export compilerString=gcc15
 
 #> Set General Parameters for Configuring the Simulation
  VRSN=v55                       #> Code Version
