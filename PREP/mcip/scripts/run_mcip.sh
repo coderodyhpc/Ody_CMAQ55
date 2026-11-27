@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Definition of main subdirectories
- export CMAQ_HOME=/home/ubuntu/CMAQ
- export CMAQ_REPO=/home/ubuntu/CMAQ
+ export CMAQ_HOME=/home/ubuntu/CMAQv5
+ export CMAQ_REPO=/home/ubuntu/CMAQv5
  export CMAQ_DATA=$CMAQ_HOME/data_custom
 
 # Definition of parameters
@@ -11,14 +11,14 @@
  GridName=ex_12k                     # 16-character maximum
 
 # Definition of subdirectories holding the data
- DataPath=/home/ubuntu/WRF-4.6/test/em_real
+ DataPath=/home/ubuntu/WRF-4.8/test/em_real
  InMetDir=$DataPath
  InGeoDir=/home/ubuntu/PREPRO/WPS
  OutDir=$CMAQ_DATA/$APPL
  ProgDir=$CMAQ_HOME/PREP/mcip/src
  WorkDir=$DataPath/mcip/$GridName
 
- InMetFiles="/home/ubuntu/WRF-4.6/test/em_real/wrfout_d01_2022-12-29_18_00_00"
+ InMetFiles="/home/ubuntu/WRF-4.8/test/em_real/wrfout_d01_2022-12-29_18_00_00"
 
  IfGeo="T"
  InGeoFile=$InGeoDir/geo_em.d01.nc
