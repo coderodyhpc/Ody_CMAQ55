@@ -160,7 +160,7 @@
 #> Recompile BLDMAKE from source if requested or if it does not exist
 # cd ${CMAQ_REPO}/UTIL/bldmake/scripts
 # ./bldit_bldmake.sh
- Blder="/home/ubuntu/CMAQ/UTIL/bldmake/bldmake_gcc.exe -serial -verbose"
+ Blder="/home/ubuntu/CMAQv5/UTIL/bldmake/bldmake_gcc.exe -serial -verbose"
 
 #> Relocate to the BLD_* directory 
  cd $Bld
