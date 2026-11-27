@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #> Critical Folder Locations
- export CMAQ_HOME=/home/ubuntu/CMAQ
- export CMAQ_REPO=/home/ubuntu/CMAQ
+ export CMAQ_HOME=/home/ubuntu/CMAQv5
+ export CMAQ_REPO=/home/ubuntu/CMAQv5
 
 #> Set the compiler option
  export compiler=gcc
- export Vrsn=14.2
- export compilerVrsn=14
+ export Vrsn=15.2
+ export compilerVrsn=15
 
 # =======================================================================
 #> Begin User Input Section
@@ -18,7 +18,7 @@
  export REPOROOT=$BCON_SRC
 
 #> Working directory and Version IDs
- VRSN=v54                     #> Code Version
+ VRSN=v55                     #> Code Version
  EXEC=BCON_${VRSN}.exe        #> executable name for this application
  CFG=BCON_${VRSN}.cfg         #> BLDMAKE configuration file name
 
