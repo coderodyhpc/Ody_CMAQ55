@@ -4,13 +4,13 @@
 #> Runtime Environment Options
 # ==================================================================
 
- export CMAQ_HOME=/home/ubuntu/CMAQ
- export CMAQ_REPO=/home/ubuntu/CMAQ
- export CMAQ_DATA=/home/ubuntu/CMAQ/data_custom
+ export CMAQ_HOME=/home/ubuntu/CMAQv5
+ export CMAQ_REPO=/home/ubuntu/CMAQv5
+ export CMAQ_DATA=/home/ubuntu/CMAQv5/data_custom
 
 #> Set the compiler option
  export compiler=gcc
- export Vrsn=14.2
+ export Vrsn=15.2
 
 #> Set General Parameters for Configuring the Simulation
  VRSN=v55                       #> Code Version
@@ -18,12 +18,12 @@
  BCTYPE=profile
 
 #> Set the working directory:
- BLD=/home/ubuntu/CMAQ/PREP/bcon/scripts/BLD_BCON_v54_gcc12
+ BLD=/home/ubuntu/CMAQv5/PREP/bcon/scripts/BLD_BCON_v54_gcc12
  EXEC=BCON_${VRSN}.exe  
 
 #> Horizontal grid definition 
  export GRID_NAME=exem
- export GRIDDESC=/home/ubuntu/CMAQ/data_custom/exemplum/GRIDDESC
+ export GRIDDESC=/home/ubuntu/CMAQv5/data_custom/exemplum/GRIDDESC
  export IOAPI_ISPH=20                     #> GCTP spheroid, use 20 for WRF-based modeling
 
 #> I/O Controls
@@ -75,17 +75,17 @@
 #   export SDATE=2023-01-15
 #   export STIME=000000
 #   export RUNLEN=240000
- export MET_BDY_3D_FIN=/home/ubuntu/CMAQ/data_custom/exemplum/METBDY3D_exemplum.nc
- export BNDY_CONC_1=/home/ubuntu/CMAQ/data_custom/exemplum/BNDY_CONC_1
+ export MET_BDY_3D_FIN=/home/ubuntu/CMAQv5/data_custom/exemplum/METBDY3D_exemplum.nc
+ export BNDY_CONC_1=/home/ubuntu/CMAQv5/data_custom/exemplum/BNDY_CONC_1
  if [ $BCON_TYPE == regrid ]
  then 
-    export CTM_CONC_1=/home/ubuntu/CMAQ/data_custom/exemplum/CTM_CONC_1
-    export MET_CRO_3D_CRS=/home/ubuntu/CMAQ/data_custom/exemplum/METCRO3D_exemplum.nc
+    export CTM_CONC_1=/home/ubuntu/CMAQv5/data_custom/exemplum/CTM_CONC_1
+    export MET_CRO_3D_CRS=/home/ubuntu/CMAQv5/data_custom/exemplum/METCRO3D_exemplum.nc
  fi
 
  if [ $BCON_TYPE == profile ]
  then
-    export BC_PROFILE=/home/ubuntu/CMAQ/PREP/bcon/src/profile/avprofile_cb6r3m_ae7_kmtbr_hemi2016_v53beta2_m3dry_col051_row068.csv
+    export BC_PROFILE=/home/ubuntu/CMAQv5/PREP/bcon/src/profile/avprofile_cb6r3m_ae7_kmtbr_hemi2016_v53beta2_m3dry_col051_row068.csv
  fi
 
 # =====================================================================
